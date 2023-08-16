@@ -2,6 +2,8 @@ package kotlinjava.gettersetter;
 
 import java.time.LocalDate;
 
+import kotlinjava.gettersetter.Student;
+
 /**
  * JavaGetterSetterExample
  *

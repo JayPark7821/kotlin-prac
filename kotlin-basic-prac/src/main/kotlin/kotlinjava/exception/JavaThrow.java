@@ -2,6 +2,8 @@ package kotlinjava.exception;
 
 import java.io.IOException;
 
+import kotlinjava.exception.KotlinThrow;
+
 /**
  * JavaThrow
  *

@@ -1,5 +1,7 @@
 package kotlinjava.extensions;
 
+import kotlinjava.extensions.MyExtensionsKt;
+
 /**
  * ExtensionExample
  *
