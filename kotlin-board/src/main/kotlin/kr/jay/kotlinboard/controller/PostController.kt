@@ -1,7 +1,13 @@
 package kr.jay.kotlinboard.controller
 
 import kr.jay.kotlinboard.controller.dto.PostCreateRequest
+import kr.jay.kotlinboard.controller.dto.PostDetailResponse
+import kr.jay.kotlinboard.controller.dto.PostSearchRequest
+import kr.jay.kotlinboard.controller.dto.PostSummaryResponse
+import org.springframework.data.domain.Page
 import org.springframework.web.bind.annotation.*
+import java.awt.print.Pageable
+import java.time.LocalDateTime
 
 /**
  * PostController
@@ -37,4 +43,24 @@ class PostController {
         return id
     }
 
+    @GetMapping("/post/{id}")
+    fun getPost(
+        @PathVariable id: Long,
+    ): PostDetailResponse{
+        return PostDetailResponse(
+            id = id,
+            title = "title",
+            content = "content",
+            createdBy = "createdBy",
+            createdAt = LocalDateTime.now().toString(),
+        )
+    }
+
+    @GetMapping("/posts")
+    fun getPosts(
+        pageable: Pageable,
+        postSearchRequest: PostSearchRequest,
+    ): Page<PostSummaryResponse> {
+        return Page.empty()
+    }
 }
