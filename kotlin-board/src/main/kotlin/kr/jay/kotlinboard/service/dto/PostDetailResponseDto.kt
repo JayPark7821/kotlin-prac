@@ -1,15 +1,15 @@
-package kr.jay.kotlinboard.controller.dto
+package kr.jay.kotlinboard.service.dto
 
-import kr.jay.kotlinboard.service.dto.PostDetailResponseDto
+import kr.jay.kotlinboard.domain.Post
 
 /**
- * PostDetailResponse
+ * PostDetailResponseDto
  *
  * @author jaypark
  * @version 1.0.0
- * @since 2023/09/05
+ * @since 2023/09/06
  */
-data class PostDetailResponse(
+data class PostDetailResponseDto(
     val id: Long,
     val title: String,
     val content: String,
@@ -17,11 +17,11 @@ data class PostDetailResponse(
     val createdAt: String,
 )
 
-fun PostDetailResponseDto.toResponse() =
-    PostDetailResponse(
+fun Post.toDetailResponseDto() =
+    PostDetailResponseDto(
         id = id,
         title = title,
         content = content,
         createdBy = createdBy,
-        createdAt = createdAt
+        createdAt = createdAt.toString()
     )

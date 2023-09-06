@@ -1,5 +1,7 @@
 package kr.jay.kotlinboard.controller.dto
 
+import kr.jay.kotlinboard.service.dto.PostSummaryResponseDto
+
 /**
  * PostSummaryResponse
  *
@@ -13,3 +15,11 @@ data class PostSummaryResponse(
     val createdBy: String,
     val createdAt: String,
 )
+
+fun PostSummaryResponseDto.toResponse() =
+    PostSummaryResponse(
+        id = id,
+        title = title,
+        createdBy = createdBy,
+        createdAt = createdAt
+    )

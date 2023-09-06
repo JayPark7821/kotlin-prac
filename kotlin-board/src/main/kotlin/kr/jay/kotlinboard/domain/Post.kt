@@ -4,6 +4,8 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import kr.jay.kotlinboard.exception.PostNotUpdatableException
+import kr.jay.kotlinboard.service.dto.PostUpdateRequestDto
 
 /**
  * Post
@@ -13,11 +15,11 @@ import jakarta.persistence.Id
  * @since 2023/09/05
  */
 @Entity
-class Post (
+class Post(
     createdBy: String,
     title: String,
     content: String,
-): BaseEntity(createdBy) {
+) : BaseEntity(createdBy) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
@@ -26,4 +28,13 @@ class Post (
         protected set
     var content: String = content
         protected set
+
+    fun update(postUpdateRequestDto: PostUpdateRequestDto) {
+        if (postUpdateRequestDto.updatedBy != this.createdBy) {
+            throw PostNotUpdatableException()
+        }
+        this.title = postUpdateRequestDto.title
+        this.content = postUpdateRequestDto.content
+        super.updatedBy(postUpdateRequestDto.updatedBy)
+    }
 }

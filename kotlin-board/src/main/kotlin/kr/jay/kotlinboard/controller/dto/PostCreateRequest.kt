@@ -1,6 +1,6 @@
 package kr.jay.kotlinboard.controller.dto
 
-import org.springframework.data.annotation.CreatedBy
+import kr.jay.kotlinboard.service.dto.PostCreateRequestDto
 
 /**
  * PostCreateRequest
@@ -14,3 +14,10 @@ data class PostCreateRequest(
     val content: String,
     val createdBy: String,
 )
+
+fun PostCreateRequest.toDto() =
+    PostCreateRequestDto(
+        title = title,
+        content = content,
+        createdBy = createdBy
+    )

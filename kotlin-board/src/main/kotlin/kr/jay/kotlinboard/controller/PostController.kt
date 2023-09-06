@@ -4,10 +4,13 @@ import kr.jay.kotlinboard.controller.dto.PostCreateRequest
 import kr.jay.kotlinboard.controller.dto.PostDetailResponse
 import kr.jay.kotlinboard.controller.dto.PostSearchRequest
 import kr.jay.kotlinboard.controller.dto.PostSummaryResponse
+import kr.jay.kotlinboard.controller.dto.PostUpdateRequest
+import kr.jay.kotlinboard.controller.dto.toDto
+import kr.jay.kotlinboard.controller.dto.toResponse
+import kr.jay.kotlinboard.service.PostService
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.*
-import java.awt.print.Pageable
-import java.time.LocalDateTime
 
 /**
  * PostController
@@ -18,42 +21,38 @@ import java.time.LocalDateTime
  */
 
 @RestController
-class PostController {
+class PostController(
+    private val postService: PostService,
+) {
 
     @PostMapping("/post")
     fun createPost(
-        @RequestBody request: PostCreateRequest
-    ): Long{
-        return 1L
+        @RequestBody request: PostCreateRequest,
+    ): Long {
+        return postService.createPost(request.toDto())
     }
 
     @PutMapping("/post/{id}")
     fun updatePost(
         @PathVariable id: Long,
-        @RequestBody request: PostCreateRequest,
-    ): Long{
-        return 1L
+        @RequestBody request: PostUpdateRequest,
+    ): Long {
+        return postService.updatePost(id, request.toDto())
     }
 
     @DeleteMapping("/post/{id}")
     fun deletePost(
         @PathVariable id: Long,
         @RequestParam createdBy: String,
-    ): Long{
-        return id
+    ): Long {
+        return postService.deletePost(id, createdBy)
     }
 
     @GetMapping("/post/{id}")
     fun getPost(
         @PathVariable id: Long,
-    ): PostDetailResponse{
-        return PostDetailResponse(
-            id = id,
-            title = "title",
-            content = "content",
-            createdBy = "createdBy",
-            createdAt = LocalDateTime.now().toString(),
-        )
+    ): PostDetailResponse {
+        return postService.getPost(id).toResponse()
     }
 
     @GetMapping("/posts")
@@ -61,6 +60,7 @@ class PostController {
         pageable: Pageable,
         postSearchRequest: PostSearchRequest,
     ): Page<PostSummaryResponse> {
-        return Page.empty()
+        return postService.findPageBy(pageable, postSearchRequest.toDto())
+            .map { it.toResponse() }
     }
 }

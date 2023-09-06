@@ -1,5 +1,6 @@
 package kr.jay.kotlinboard.controller.dto
 
+import kr.jay.kotlinboard.service.dto.PostSearchRequestDto
 import org.springframework.web.bind.annotation.RequestParam
 
 /**
@@ -15,3 +16,9 @@ data class PostSearchRequest(
     @RequestParam
     val createdBy: String?,
 )
+
+fun PostSearchRequest.toDto() =
+    PostSearchRequestDto(
+        title = title,
+        createdBy = createdBy
+    )

@@ -1,5 +1,7 @@
 package kr.jay.kotlinboard.controller.dto
 
+import kr.jay.kotlinboard.service.dto.PostUpdateRequestDto
+
 /**
  * PostUpdateRequest
  *
@@ -12,3 +14,10 @@ data class PostUpdateRequest(
     val content: String,
     val updatedBy: String,
 )
+
+fun PostUpdateRequest.toDto() =
+    PostUpdateRequestDto(
+        title = title,
+        content = content,
+        updatedBy = updatedBy
+    )
