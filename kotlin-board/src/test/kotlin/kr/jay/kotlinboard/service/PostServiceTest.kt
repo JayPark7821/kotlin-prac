@@ -7,10 +7,12 @@ import io.kotest.matchers.longs.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
+import kr.jay.kotlinboard.domain.Comment
 import kr.jay.kotlinboard.domain.Post
 import kr.jay.kotlinboard.exception.PostNotDeletableException
 import kr.jay.kotlinboard.exception.PostNotFoundException
 import kr.jay.kotlinboard.exception.PostNotUpdatableException
+import kr.jay.kotlinboard.repository.CommentRepository
 import kr.jay.kotlinboard.repository.PostRepository
 import kr.jay.kotlinboard.service.dto.PostCreateRequestDto
 import kr.jay.kotlinboard.service.dto.PostSearchRequestDto
@@ -31,6 +33,7 @@ import org.springframework.data.repository.findByIdOrNull
 class PostServiceTest(
     private val postService: PostService,
     private val postRepository: PostRepository,
+    private val commentRepository: CommentRepository,
 ) : BehaviorSpec({
     beforeSpec {
         postRepository.saveAll(
@@ -136,6 +139,17 @@ class PostServiceTest(
                 shouldThrow<PostNotFoundException> {
                     postService.getPost(9999999L)
                 }
+            }
+        }
+        When("댓글 추가시"){
+            val savedComment1 = commentRepository.save(Comment(content = "댓글 내용", post = savedPost, createdBy = "jay"))
+            val savedComment2 = commentRepository.save(Comment(content = "댓글 내용", post = savedPost, createdBy = "jay"))
+            val savedComment3 = commentRepository.save(Comment(content = "댓글 내용", post = savedPost, createdBy = "jay"))
+            val savedPost = postService.getPost(savedPost.id)
+            then("댓글이 함께 조회됨"){
+                savedPost.comments.size shouldBe 3
+                savedPost.comments[0].content shouldBe "댓글 내용"
+                savedPost.comments[0].createdBy shouldBe "jay"
             }
         }
     }
