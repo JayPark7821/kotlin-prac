@@ -5,8 +5,10 @@ Content-Type: application/json
 {
     "title": "title",
     "content": "content",
-    "createdBy": "createdBy"
+    "createdBy": "createdBy",
+    "tags": ["tag1", "tag2"]
 }
+
 
 ### 게시글 수정
 PUT /localhost:8080/posts/1
@@ -15,7 +17,8 @@ Content-Type: application/json
 {
     "title": "title",
     "content": "content",
-    "updatedBy": "updatedBy"
+    "updatedBy": "createdBy",
+    "tags": ["tag1", "tag2"]
 }
 
 ### 게시글 삭제
