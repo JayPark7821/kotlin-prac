@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:test;MODE=MySQL;DB_CLOSE_DELAY=-1
+    #        url: jdbc:mysql://hanghae-order-mysql:3306/order
+    username: root
+    password: rootpassword
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+#      hibernate:
+#        session_factory:
+#          statement_inspector: kr.jay.kopringboottemplate.common.HibernateQueryCounter
+        use_sql_comments: true
+    show-sql: true
+#    cloud:
