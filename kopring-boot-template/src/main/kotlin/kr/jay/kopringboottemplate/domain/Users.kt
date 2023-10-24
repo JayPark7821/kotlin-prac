@@ -19,8 +19,4 @@ class Users(
 
     var name: String = name
         private set
-
-    @OneToMany(mappedBy = "users", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    var posts: MutableList<Post> = mutableListOf()
-        private set
 }

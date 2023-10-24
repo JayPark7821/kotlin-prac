@@ -22,7 +22,7 @@ class HibernateQueryCounter(
     }
 
     fun start() {
-        queryCount.set(Counter(AtomicLong(0), System.currentTimeMillis()))
+        queryCount.set(Counter(AtomicLong(0) , mutableMapOf()))
     }
 
     fun getCount(): Counter {
@@ -36,16 +36,22 @@ class HibernateQueryCounter(
     override fun inspect(sql: String): String {
         val counter = queryCount.get()
         if (counter != null) {
-            val count: AtomicLong = counter.count
+            val count: AtomicLong = counter.totalQueryCount
             count.addAndGet(1)
+            val queryList: MutableMap<String, AtomicLong> = counter.occurredQuery
+            if (queryList.containsKey(sql)) {
+                queryList[sql]!!.addAndGet(1)
+            } else {
+                queryList[sql] = AtomicLong(1)
+            }
         }
         return sql
     }
 
 
     data class Counter (
-        val count: AtomicLong = AtomicLong(0),
-        val time: Long = System.currentTimeMillis(),
+        val totalQueryCount: AtomicLong = AtomicLong(0),
+        val occurredQuery: MutableMap<String, AtomicLong>
     )
 
 }

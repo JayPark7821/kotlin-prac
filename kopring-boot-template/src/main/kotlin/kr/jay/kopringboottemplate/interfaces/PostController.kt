@@ -22,9 +22,8 @@ class PostController(
     fun createPost(@RequestBody request: PostRequest) =
         PostResponse(postService.createPost(request.userId, request.title, request.content))
 
-    @GetMapping("/{id}")
-    fun getPostById(@PathVariable id: Long)=
-        postService.getPostByUserId(id).map { PostResponse(it) }
+    @GetMapping
+    fun findAllPosts()= postService.findAllPosts().map { PostResponse(it) }
 }
 
 data class PostResponse(

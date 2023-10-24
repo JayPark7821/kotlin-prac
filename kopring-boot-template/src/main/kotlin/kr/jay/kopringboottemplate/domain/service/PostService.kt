@@ -17,20 +17,13 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class PostService(
     private val postJpaRepository: PostJpaRepository,
-    private val userJpaRepository: UserJpaRepository,
     private val userService: UserService
 ) {
-    fun getPostByUserId(id: Long): List<Post> {
-        val user = userJpaRepository.findById(id).orElseThrow()
-        return user.posts
-
-    }
-
-
+    fun findAllPosts(): List<Post> =postJpaRepository.findAll()
 
     @Transactional
     fun createPost(userId: Long, title: String, content: String): Post {
-        val user = userService.getByUserId(1L)
+        val user = userService.getByUserId(userId)
         return postJpaRepository.save(Post(title, content, user))
     }
 }
