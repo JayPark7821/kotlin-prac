@@ -1,4 +1,4 @@
-package kr.jay.kopringboottemplate.common
+package kr.jay.kopringboottemplate.common.utils
 
 import jakarta.servlet.ReadListener
 import jakarta.servlet.ServletInputStream

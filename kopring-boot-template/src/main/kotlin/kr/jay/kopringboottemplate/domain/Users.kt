@@ -19,4 +19,8 @@ class Users(
 
     var name: String = name
         private set
+
+    override fun toString(): String {
+        return "Users(id=$id, name='$name')"
+    }
 }

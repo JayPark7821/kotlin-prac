@@ -1,4 +1,4 @@
-package kr.jay.kopringboottemplate.common
+package kr.jay.kopringboottemplate.common.utils
 
 import org.hibernate.resource.jdbc.spi.StatementInspector
 import org.springframework.stereotype.Component

@@ -3,7 +3,7 @@ package kr.jay.kopringboottemplate.common.filter
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import kr.jay.kopringboottemplate.common.BufferedRequestWrapper
+import kr.jay.kopringboottemplate.common.utils.BufferedRequestWrapper
 import org.slf4j.Logger
 import org.slf4j.MDC
 import org.springframework.web.filter.OncePerRequestFilter
@@ -48,8 +48,6 @@ class RequestTraceLoggingFilter(
     }
 
     private fun requestLog(request: HttpServletRequest): HttpServletRequest {
-
-
         log.info(
             "Request Started ===> [ {} ] : {} ",
             request.method,

@@ -22,5 +22,4 @@ class RequestTraceLogFilterConfig(
         registrationBean.order = Ordered.HIGHEST_PRECEDENCE
         return registrationBean
     }
-
 }

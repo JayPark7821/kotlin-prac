@@ -10,7 +10,7 @@ spring:
     properties:
 #      hibernate:
 #        session_factory:
-#          statement_inspector: kr.jay.kopringboottemplate.common.HibernateQueryCounter
+#          statement_inspector: kr.jay.kopringboottemplate.common.utils.HibernateQueryCounter
         use_sql_comments: true
     show-sql: true
 #    cloud:
