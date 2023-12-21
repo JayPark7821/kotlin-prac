@@ -1,0 +1,9 @@
+spring:
+  data:
+    mongodb:
+      username: root
+      password: admin
+      host: localhost
+      port: 27017
+      database: mongo-prac
+      authentication-database: admin
