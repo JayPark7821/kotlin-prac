@@ -1,0 +1,13 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+  sql:
+    init:
+      mode: embedded
+      schema-locations: classpath:db-init/schema.sql
+
+logging:
+  level:
+    kr.jay.webfluxreactor: DEBUG
+    org.springframework.r2dbc.core: DEBUG

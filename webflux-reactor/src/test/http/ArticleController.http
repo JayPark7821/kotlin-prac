@@ -1,0 +1,35 @@
+POST {{domain}}/article
+Content-Type: application/json
+
+{
+  "title": "afaew",
+  "body": "aewfaefwaefw",
+  "authorId": 1
+}
+
+
+###
+GET {{domain}}/article/1
+
+###
+GET {{domain}}/article/all
+
+> {%
+    client.test("should not be empty", function () {
+        client.assert(response.body.length > 0, "response body is not empty");
+        client.assert(response.status === 200, "response status code is 200");
+    })
+%}
+
+###
+PUT {{domain}}/article/1
+Content-Type: application/json
+
+{
+  "title": "efwefwaefwaaa",
+  "body": "aaaaaaaaaa"
+}
+
+
+###
+DELETE {{domain}}/article/1
