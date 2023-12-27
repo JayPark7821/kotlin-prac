@@ -2,6 +2,7 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '0.5.0'
 }
 rootProject.name = 'kotlin-prac'
-include 'kotlin-prac-basic'
 include 'kotlin-basic-prac'
+include 'reactor'
+include 'coroutines-prac'
 
