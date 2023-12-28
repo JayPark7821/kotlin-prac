@@ -1,0 +1,47 @@
+spring:
+  profiles:
+    active: stress
+---
+spring:
+  output:
+    ansi:
+      enabled: always
+  application:
+    name: webflux-coroutine
+  r2dbc:
+    url: r2dbc:pool:mariadb://localhost:3306/sample
+    username: user
+    password: 1234
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db-init/schema.sql
+
+logging:
+  level:
+    kr.jay.webfluxcoroutine: debug
+#    org.springframework.r2dbc.core: debug
+#    org.springframework.r2dbc.connection.init: debug
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  r2dbc:
+    url: r2dbc:pool:mariadb://localhost:3306/sample
+    username: user
+    password: 1234
+
+---
+spring:
+  config:
+    activate:
+      on-profile: stress
+  r2dbc:
+    url: r2dbc:pool:mariadb://localhost:3306/sample
+    username: user
+    password: 1234
+  sql:
+    init:
+      mode: never
