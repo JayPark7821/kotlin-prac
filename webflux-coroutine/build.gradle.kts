@@ -19,6 +19,13 @@ repositories {
 }
 
 dependencies {
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop
+	implementation("org.springframework.boot:spring-boot-starter-aop")
+
+
+	// https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-slf4j
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.7.3")
+
 	implementation("io.netty:netty-resolver-dns-native-macos:4.1.68.Final:osx-aarch_64")
 	// https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
