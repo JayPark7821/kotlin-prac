@@ -19,6 +19,10 @@ repositories {
 }
 
 dependencies {
+	implementation("io.netty:netty-resolver-dns-native-macos:4.1.68.Final:osx-aarch_64")
+	runtimeOnly("org.mariadb:r2dbc-mariadb:1.1.3")
+	runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
+
 	implementation("io.github.microutils:kotlin-logging:3.0.5")
 	implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
