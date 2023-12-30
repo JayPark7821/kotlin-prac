@@ -1,4 +1,8 @@
 spring:
+  profiles:
+    active: stress
+---
+spring:
   output:
     ansi:
       enabled: always
@@ -10,4 +14,17 @@ spring:
 logging:
   level:
     kr.jay.webfluxreactor: DEBUG
-    org.springframework.r2dbc.core: DEBUG
+#    org.springframework.r2dbc.core: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: stress
+  r2dbc:
+    url: r2dbc:pool:mariadb://localhost:3306/sample
+    username: user
+    password: 1234
+  sql:
+    init:
+      mode: never
