@@ -10,16 +10,30 @@ import kotlinx.coroutines.flow.toList
 import kr.jay.webfluxcoroutine.repository.ArticleRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.transaction.reactive.TransactionalOperator
+import org.springframework.transaction.reactive.executeAndAwait
 
 @SpringBootTest
 class ArticleServiceTest(
- @Autowired private val sut: ArticleService,
- @Autowired private val repository: ArticleRepository,
+    @Autowired private val sut: ArticleService,
+    @Autowired private val repository: ArticleRepository,
+    @Autowired private val rxtx: TransactionalOperator,
  ) : StringSpec({
 
-     beforeTest {
-         repository.deleteAll()
-     }
+//     beforeTest {
+//         repository.deleteAll()
+//     }
+
+    "get all"{
+        rxtx.executeAndAwait { tx ->
+            tx.setRollbackOnly()
+            sut.create(ReqCreate(title = "test", body = "test", authorId = 1))
+            sut.create(ReqCreate(title = "test", body = "test", authorId = 1))
+            sut.create(ReqCreate(title = "test matched", body = "test", authorId = 1))
+            sut.getAll().toList().size shouldBe 3
+            sut.getAll("matched").toList().size shouldBe 1
+        }
+    }
 
     "create and get" {
         val created = sut.create(ReqCreate(title = "test", body = "test", authorId = 1))
@@ -30,13 +44,7 @@ class ArticleServiceTest(
         get.createdAt shouldNotBe null
         get.updatedAt shouldNotBe null
     }
-    "get all"{
-        sut.create(ReqCreate(title = "test", body = "test", authorId = 1))
-        sut.create(ReqCreate(title = "test", body = "test", authorId = 1))
-        sut.create(ReqCreate(title = "test matched", body = "test", authorId = 1))
-        sut.getAll().toList().size shouldBe 3
-        sut.getAll("matched").toList().size shouldBe 1
-    }
+
     "update"{
         val created = sut.create(ReqCreate(title = "test", body = "test", authorId = 1))
         sut.update(created.id, ReqUpdate(title = "updated", body = "updated", authorId = 2))
