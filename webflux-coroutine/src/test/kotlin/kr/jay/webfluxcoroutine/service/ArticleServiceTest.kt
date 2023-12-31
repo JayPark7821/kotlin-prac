@@ -2,6 +2,7 @@ package kr.jay.webfluxcoroutine.service
 
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.date.after
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.toList
 import kr.jay.webfluxcoroutine.repository.ArticleRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.transaction.reactive.TransactionCallback
 import org.springframework.transaction.reactive.TransactionalOperator
 import org.springframework.transaction.reactive.executeAndAwait
 
@@ -20,13 +22,8 @@ class ArticleServiceTest(
     @Autowired private val rxtx: TransactionalOperator,
  ) : StringSpec({
 
-//     beforeTest {
-//         repository.deleteAll()
-//     }
-
     "get all"{
-        rxtx.executeAndAwait { tx ->
-            tx.setRollbackOnly()
+        rxtx.rollback {
             sut.create(ReqCreate(title = "test", body = "test", authorId = 1))
             sut.create(ReqCreate(title = "test", body = "test", authorId = 1))
             sut.create(ReqCreate(title = "test matched", body = "test", authorId = 1))
@@ -61,3 +58,10 @@ class ArticleServiceTest(
         repository.count() shouldBe prevCount
     }
 })
+
+suspend fun <T> TransactionalOperator.rollback(f: suspend (org.springframework.transaction.ReactiveTransaction) -> T): T{
+   return this.executeAndAwait { tx ->
+        tx.setRollbackOnly()
+        f.invoke(tx)
+    }
+}
