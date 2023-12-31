@@ -11,11 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
 import org.springframework.http.MediaType
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.temporal.ChronoUnit
 
 private val logger = KotlinLogging.logger {}
 @SpringBootTest
+@ActiveProfiles("test")
 class ArticleControllerTest(
     @Autowired private val repository: ArticleRepository,
     @Autowired private val service: ArticleService,
