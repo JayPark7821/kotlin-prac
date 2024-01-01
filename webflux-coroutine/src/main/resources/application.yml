@@ -43,6 +43,13 @@ spring:
     username: user
     password: 1234
 
+server:
+  error:
+    include-exception: true
+    include-binding-errors: always
+    include-message: always
+    include-stacktrace: always
+
 ---
 spring:
   config:
