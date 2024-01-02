@@ -4,14 +4,18 @@ import jakarta.validation.*
 import jakarta.validation.constraints.*
 import kr.jay.webfluxcoroutine.service.AdvancedService
 import mu.KotlinLogging
-import org.aspectj.lang.annotation.Aspect
-import org.springframework.stereotype.Component
+import org.springframework.http.HttpStatus
+import org.springframework.validation.BindException
+import org.springframework.validation.BindingResult
+import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
 
 /**
  * AdvancedController
@@ -36,11 +40,32 @@ class AdvancedController(
     }
 
     @GetMapping("/test/error")
-    suspend fun error(@RequestBody @Valid reqErrorTest: ReqErrorTest) {
-        logger.debug { "request: $reqErrorTest" }
+    suspend fun error(
+        @RequestBody @Valid request: ReqErrorTest,
+//        errors: BindingResult,
+    ) {
+        logger.debug { "request: $request" }
+
+        if (request.message == "error") {
+//            errors.rejectValue(request::message.name, "custom")
+//            throw BindException(errors)
+            throw InvalidParameter(request, request::message, code = "customCode", message = "custom error")
+        }
 //        throw RuntimeException("yahooooooo !! ")
     }
 }
+
+@ResponseStatus(code = HttpStatus.BAD_REQUEST)
+class InvalidParameter : BindException {
+    constructor(request: Any, field: KProperty<*>, code: String = "", message: String = "") :
+            super(WebDataBinder(request, request::class.simpleName!!).bindingResult
+                .apply {
+                    rejectValue(field.name, code, message)
+                }
+            )
+
+}
+
 
 data class ReqErrorTest(
     @field:NotEmpty
@@ -52,6 +77,8 @@ data class ReqErrorTest(
     val age: Int?,
     @field:DateString
     val birthday: String?,
+
+    val message: String? = null,
 )
 
 @Target(AnnotationTarget.FIELD)
