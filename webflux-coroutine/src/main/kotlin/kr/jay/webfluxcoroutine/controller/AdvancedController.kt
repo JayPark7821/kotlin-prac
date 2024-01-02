@@ -2,6 +2,8 @@ package kr.jay.webfluxcoroutine.controller
 
 import jakarta.validation.*
 import jakarta.validation.constraints.*
+import kr.jay.webfluxcoroutine.config.validator.DateString
+import kr.jay.webfluxcoroutine.exception.InvalidParameter
 import kr.jay.webfluxcoroutine.service.AdvancedService
 import mu.KotlinLogging
 import org.springframework.http.HttpStatus
@@ -55,16 +57,6 @@ class AdvancedController(
     }
 }
 
-@ResponseStatus(code = HttpStatus.BAD_REQUEST)
-class InvalidParameter : BindException {
-    constructor(request: Any, field: KProperty<*>, code: String = "", message: String = "") :
-            super(WebDataBinder(request, request::class.simpleName!!).bindingResult
-                .apply {
-                    rejectValue(field.name, code, message)
-                }
-            )
-
-}
 
 
 data class ReqErrorTest(
@@ -81,23 +73,3 @@ data class ReqErrorTest(
     val message: String? = null,
 )
 
-@Target(AnnotationTarget.FIELD)
-@Retention(AnnotationRetention.RUNTIME)
-@Constraint(validatedBy = [DataValidator::class])
-annotation class DateString(
-    val message: String = "not a valid data",
-    val groups: Array<KClass<*>> = [],
-    val payload: Array<KClass<out Payload>> = [],
-)
-
-class DataValidator : ConstraintValidator<DateString, String> {
-    override fun isValid(value: String?, context: ConstraintValidatorContext?): Boolean {
-        val text = value?.filter { it.isDigit() } ?: return true
-        return runCatching {
-            LocalDate.parse(text, DateTimeFormatter.ofPattern("yyyyMMdd")).let {
-                if (text != it.format(DateTimeFormatter.ofPattern("yyyyMMdd"))) null else true
-            }
-        }
-            .getOrNull() != null
-    }
-}

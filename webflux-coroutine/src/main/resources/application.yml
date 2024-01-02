@@ -20,6 +20,8 @@ spring:
 logging:
   level:
     kr.jay.webfluxcoroutine: debug
+    org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler: off
+    org.springframework.web.HttpLogging: off
 #    org.springframework.r2dbc.core: debug
 #    org.springframework.r2dbc.connection.init: debug
   pattern:

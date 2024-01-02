@@ -1,6 +1,7 @@
 package kr.jay.webfluxcoroutine.config
 
 import io.micrometer.context.ContextRegistry
+import kr.jay.webfluxcoroutine.config.extension.txid
 import mu.KotlinLogging
 import org.slf4j.MDC
 import org.springframework.core.Ordered

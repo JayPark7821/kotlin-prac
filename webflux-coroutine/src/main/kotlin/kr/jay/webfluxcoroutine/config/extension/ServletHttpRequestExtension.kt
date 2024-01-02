@@ -1,4 +1,4 @@
-package kr.jay.webfluxcoroutine.config
+package kr.jay.webfluxcoroutine.config.extension
 
 import org.springframework.http.server.reactive.ServerHttpRequest
 import java.util.HashMap
