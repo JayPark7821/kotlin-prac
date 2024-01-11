@@ -19,6 +19,15 @@ repositories {
 }
 
 dependencies {
+    implementation ("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
+
+    implementation("org.opensearch.client:spring-data-opensearch-starter:1.3.0"){
+        exclude(group = "org.opensearch.client", module = "opensearch-rest-client-sniffer")
+    }
+    implementation("org.opensearch.client:spring-data-opensearch:1.3.0")
+    implementation("org.opensearch.client:opensearch-java:2.6.0")
+
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
