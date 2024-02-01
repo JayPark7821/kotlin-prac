@@ -1,6 +1,8 @@
 package kr.jay.couponcore.model
 
 import jakarta.persistence.*
+import kr.jay.couponcore.exception.CouponIssueException
+import kr.jay.couponcore.exception.ErrorCode
 import java.time.LocalDateTime
 
 /**
@@ -14,58 +16,76 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "coupons")
 class Coupon(
-   dateIssueStart: LocalDateTime,
+    name: String,
+    dateIssueStart: LocalDateTime,
     dateIssueEnd: LocalDateTime,
+    couponType: CouponType,
 ) : BaseTimeEntity() {
 
-    private val dateIssueEnd = dateIssueEnd
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
+        private set
 
     @Column(nullable = false)
-    var name: String? = null
+    var name: String = name
+        private set
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    var couponType: CouponType? = null
-
+    var couponType: CouponType = couponType
+        private set
     var totalQuantity: Int? = null
+        private set
 
     @Column(nullable = false)
     var issuedQuantity: Int = 0
+        private set
 
-    @Column(nullable = false)
     var discountAmount: Int? = null
+        private set
 
-    @Column(nullable = false)
     var minAvailableAmount: Int? = null
+        private set
 
     @Column(nullable = false)
     var dateIssuedStart: LocalDateTime = dateIssueStart
+        private set
 
     @Column(nullable = false)
     var dateIssuedEnd: LocalDateTime = dateIssueEnd
+        private set
 
-    private fun availableIssueQuantity(): Boolean {
+    fun availableIssueQuantity(): Boolean {
         if (totalQuantity == null) {
             return true;
         }
         return totalQuantity!! > issuedQuantity
     }
 
-    private fun availableIssueDate(): Boolean{
+    fun availableIssueDate(): Boolean {
         val now = LocalDateTime.now()
         return dateIssuedStart.isBefore(now) && dateIssuedEnd.isAfter(now)
     }
 
     fun issue() {
-        if(!availableIssueQuantity()) {
-            throw RuntimeException("쿠폰이 모두 소진되었습니다.")
+        if (!availableIssueQuantity()) {
+            throw CouponIssueException(
+                ErrorCode.INVALID_COUPON_ISSUE_QUANTITY,
+                "발급 가능한 수량을 초과했습니다. " +
+                    "total : $totalQuantity, " +
+                    "issued : $issuedQuantity"
+            )
         }
         if (!availableIssueDate()) {
-            throw RuntimeException("쿠폰이 발급 기간이 아닙니다.")
+            throw CouponIssueException(
+                ErrorCode.INVALID_COUPON_ISSUE_DATE,
+                "발급 가능한 일자가 아닙니다. " +
+                    "request : ${LocalDateTime.now()}, " +
+                    "issueStart : $dateIssuedStart, " +
+                    "issueEnd : $dateIssuedEnd"
+            )
         }
         issuedQuantity = issuedQuantity.plus(1)
     }

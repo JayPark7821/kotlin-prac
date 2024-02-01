@@ -14,21 +14,18 @@ import java.time.LocalDateTime
 
 @Entity
 @Table(name = "coupon_issues")
-class CouponIssue : BaseTimeEntity(){
+class CouponIssue(
+    @Column(nullable = false) val couponId: Long,
+    @Column(nullable = false) val userId: Long,
+) : BaseTimeEntity(){
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
     @Column(nullable = false)
-    var couponId: Long? = null
-
-    @Column(nullable = false)
-    var userId: Long? = null
-
-    @Column(nullable = false)
     @CreatedDate
-    var dateIssued: LocalDateTime? = null
+    var dateIssued: LocalDateTime = LocalDateTime.now()
 
     var dateUsed: LocalDateTime? = null
 
