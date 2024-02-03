@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
 /**
- * HellController
+ * HelloController
  *
  * @author jaypark
  * @version 1.0.0
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController
  */
 
 @RestController
-class HellController {
+class HelloController {
 
     @GetMapping("/hello")
     fun hello() = "Hello, World!"
