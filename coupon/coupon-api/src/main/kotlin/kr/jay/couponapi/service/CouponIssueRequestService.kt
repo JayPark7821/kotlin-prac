@@ -17,14 +17,9 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class CouponIssueRequestService (
     private val couponIssueService: CouponIssueService,
-    private val distributeLockExecutor: DistributeLockExecutor
 ){
 
     fun issueRequestV1(request: CouponIssueRequest){
-        distributeLockExecutor.execute(
-            "lock_${request.couponId}",
-            10000,
-            10000
-        ) { couponIssueService.issue(request.couponId, request.userId) }
+        couponIssueService.issue(request.couponId, request.userId)
     }
 }
