@@ -16,7 +16,7 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "coupons")
 class Coupon(
-    name: String,
+    title: String,
     dateIssueStart: LocalDateTime,
     dateIssueEnd: LocalDateTime,
     couponType: CouponType,
@@ -29,7 +29,7 @@ class Coupon(
         private set
 
     @Column(nullable = false)
-    var name: String = name
+    var title: String = title
         private set
 
     @Column(nullable = false)
@@ -50,11 +50,11 @@ class Coupon(
         private set
 
     @Column(nullable = false)
-    var dateIssuedStart: LocalDateTime = dateIssueStart
+    var dateIssueStart: LocalDateTime = dateIssueStart
         private set
 
     @Column(nullable = false)
-    var dateIssuedEnd: LocalDateTime = dateIssueEnd
+    var dateIssueEnd: LocalDateTime = dateIssueEnd
         private set
 
     fun availableIssueQuantity(): Boolean {
@@ -66,7 +66,7 @@ class Coupon(
 
     fun availableIssueDate(): Boolean {
         val now = LocalDateTime.now()
-        return dateIssuedStart.isBefore(now) && dateIssuedEnd.isAfter(now)
+        return dateIssueStart.isBefore(now) && dateIssueEnd.isAfter(now)
     }
 
     fun issue() {
@@ -83,8 +83,8 @@ class Coupon(
                 ErrorCode.INVALID_COUPON_ISSUE_DATE,
                 "발급 가능한 일자가 아닙니다. " +
                     "request : ${LocalDateTime.now()}, " +
-                    "issueStart : $dateIssuedStart, " +
-                    "issueEnd : $dateIssuedEnd"
+                    "issueStart : $dateIssueStart, " +
+                    "issueEnd : $dateIssueEnd"
             )
         }
         issuedQuantity = issuedQuantity.plus(1)
