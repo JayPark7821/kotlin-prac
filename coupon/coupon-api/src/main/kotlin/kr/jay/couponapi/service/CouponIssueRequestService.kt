@@ -2,6 +2,7 @@ package kr.jay.couponapi.service
 
 import kr.jay.couponapi.controller.dto.CouponIssueRequest
 import kr.jay.couponcore.component.DistributeLockExecutor
+import kr.jay.couponcore.service.AsyncCouponIssueServiceV1
 import kr.jay.couponcore.service.CouponIssueService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,9 +18,14 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class CouponIssueRequestService (
     private val couponIssueService: CouponIssueService,
+    private val asyncCouponIssueServiceV1: AsyncCouponIssueServiceV1,
 ){
 
     fun issueRequestV1(request: CouponIssueRequest){
         couponIssueService.issue(request.couponId, request.userId)
+    }
+
+    fun asyncIssueRequestV1(request: CouponIssueRequest){
+        asyncCouponIssueServiceV1.issue(request.couponId, request.userId)
     }
 }
