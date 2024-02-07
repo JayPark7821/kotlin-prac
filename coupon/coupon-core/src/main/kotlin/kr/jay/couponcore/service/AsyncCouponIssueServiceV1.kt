@@ -20,27 +20,20 @@ import org.springframework.stereotype.Service
 @Service
 class AsyncCouponIssueServiceV1(
     private val couponIssueRedisService: CouponIssueRedisService,
-    private val couponIssueService: CouponIssueService,
     private val redisRepository: RedisRepository,
     private val objectMapper: ObjectMapper,
-    private val distributeLockExecutor: DistributeLockExecutor
+    private val distributeLockExecutor: DistributeLockExecutor,
+    private val couponCacheService: CouponCacheService
 ) {
 
     fun issue(couponId: Long, userId: Long) {
-        val coupon = couponIssueService.findCoupon(couponId)
-
-        if (!coupon.availableIssueDate())
-            throw CouponIssueException(ErrorCode.INVALID_COUPON_ISSUE_DATE, "쿠폰 발급 가능 기간이 아닙니다.")
+        val coupon = couponCacheService.getCouponCache(couponId)
+        coupon.checkIssuableCoupon()
 
         distributeLockExecutor.execute(
             "lock_${couponId}", 3000, 3000
         ) {
-            if (!couponIssueRedisService.availableTotalIssueQuantity(coupon.totalQuantity, couponId))
-                throw CouponIssueException(ErrorCode.INVALID_COUPON_ISSUE_QUANTITY, "쿠폰 발급 가능 수량이 모두 소진되었습니다.")
-
-            if (!couponIssueRedisService.availableUserIssueQuantity(couponId, userId))
-                throw CouponIssueException(ErrorCode.DUPLICATED_COUPON_ISSUE, "이미 발급된 쿠폰이 존재합니다.")
-
+            couponIssueRedisService.checkCouponIssueQuantity(coupon, userId)
             issueRequest(couponId, userId)
         }
     }
