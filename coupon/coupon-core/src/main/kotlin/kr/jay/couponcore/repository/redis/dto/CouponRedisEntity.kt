@@ -29,7 +29,7 @@ class CouponRedisEntity(
         this(
             coupon.id!!,
             coupon.couponType,
-            coupon.totalQuantity ?: 0,
+            coupon.totalQuantity ?: Int.MAX_VALUE,
             coupon.dateIssueStart,
             coupon.dateIssueEnd
         )
