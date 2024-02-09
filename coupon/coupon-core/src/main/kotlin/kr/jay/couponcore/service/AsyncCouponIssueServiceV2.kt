@@ -22,7 +22,7 @@ class AsyncCouponIssueServiceV2(
 ) {
 
     fun issue(couponId: Long, userId: Long) {
-        val coupon = couponCacheService.getCouponCache(couponId)
+        val coupon = couponCacheService.getCouponLocalCache(couponId)
         coupon.checkIssuableCoupon()
         issueRequest(couponId, userId, coupon.totalQuantity)
     }

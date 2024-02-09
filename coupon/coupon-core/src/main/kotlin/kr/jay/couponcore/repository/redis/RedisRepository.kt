@@ -53,6 +53,16 @@ class RedisRepository(
         CouponIssueRequestCode.checkRequestResult(CouponIssueRequestCode.find(result))
     }
 
+    fun lSize(key: String) =
+        redisTemplate.opsForList().size(key) ?: throw RuntimeException("Failed to get list size")
+
+    fun lIndex(key: String, index: Long) =
+        redisTemplate.opsForList().index(key, index) ?: throw RuntimeException("Failed to get list index")
+
+    fun lPop(key: String) =
+        redisTemplate.opsForList().leftPop(key) ?: throw RuntimeException("Failed to pop value from list")
+
+
     private fun issueRequestScript(): RedisScript<String> {
         return RedisScript.of(
             """ 

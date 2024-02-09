@@ -166,4 +166,47 @@ class CouponTest {
                 assertThat(exception.errorCode).isEqualTo(ErrorCode.INVALID_COUPON_ISSUE_DATE)
             }
     }
+
+    @Test
+    fun `발급 기간이 아니면 true를 반환한다`(){
+        val coupon = Coupon(
+            "선착순 쿠폰",
+            LocalDateTime.now().minusDays(2),
+            LocalDateTime.now().minusDays(1),
+            CouponType.FIRST_COME_FIRST_SERVED
+        )
+        ReflectionTestUtils.setField(coupon, "totalQuantity", 100)
+        ReflectionTestUtils.setField(coupon, "issuedQuantity", 0)
+
+        assertThat(coupon.isIssueComplete()).isTrue()
+    }
+
+    @Test
+    fun `잔여 발급 가능 수량이 없다면 true를 반환한다`(){
+        val coupon = Coupon(
+            "선착순 쿠폰",
+            LocalDateTime.now().minusDays(2),
+            LocalDateTime.now().plusDays(1),
+            CouponType.FIRST_COME_FIRST_SERVED
+        )
+        ReflectionTestUtils.setField(coupon, "totalQuantity", 100)
+        ReflectionTestUtils.setField(coupon, "issuedQuantity", 100)
+
+        assertThat(coupon.isIssueComplete()).isTrue()
+    }
+
+    @Test
+    fun `발급 가능 수량과 기한이 유효하다면 false를 반환한다`(){
+        val coupon = Coupon(
+            "선착순 쿠폰",
+            LocalDateTime.now().minusDays(2),
+            LocalDateTime.now().plusDays(1),
+            CouponType.FIRST_COME_FIRST_SERVED
+        )
+        ReflectionTestUtils.setField(coupon, "totalQuantity", 100)
+        ReflectionTestUtils.setField(coupon, "issuedQuantity", 0)
+
+        assertThat(coupon.isIssueComplete()).isFalse()
+    }
+
 }

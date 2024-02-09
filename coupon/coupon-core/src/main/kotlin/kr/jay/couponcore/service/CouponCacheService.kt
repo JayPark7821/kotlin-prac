@@ -25,6 +25,14 @@ class CouponCacheService(
     fun getCouponLocalCache(couponId: Long) =
         proxy().getCouponCache(couponId)
 
+    @Cacheable(cacheNames = ["coupon"], key = "#couponId")
+    fun putCouponCache(couponId: Long) =
+        getCouponCache(couponId)
+
+    @Cacheable(cacheManager = "localCacheManager", cacheNames = ["coupon"], key = "#couponId")
+    fun putCouponLocalCache(couponId: Long) =
+        getCouponLocalCache(couponId)
+
     private fun proxy() = AopContext.currentProxy() as CouponCacheService
 
 }

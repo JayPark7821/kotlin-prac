@@ -23,7 +23,8 @@ class CouponRedisEntity(
     val couponType: CouponType,
     val totalQuantity: Int,
     dateIssueStart: LocalDateTime,
-    dateIssueEnd: LocalDateTime
+    dateIssueEnd: LocalDateTime,
+    val availableIssueQuantity: Boolean,
 ) {
     constructor(coupon: Coupon) :
         this(
@@ -31,8 +32,10 @@ class CouponRedisEntity(
             coupon.couponType,
             coupon.totalQuantity ?: Int.MAX_VALUE,
             coupon.dateIssueStart,
-            coupon.dateIssueEnd
+            coupon.dateIssueEnd,
+            coupon.availableIssueQuantity()
         )
+
 
     @JsonSerialize(using = LocalDateTimeSerializer::class)
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
@@ -48,6 +51,10 @@ class CouponRedisEntity(
     }
 
     fun checkIssuableCoupon() {
+        if(!availableIssueQuantity){
+            throw CouponIssueException(ErrorCode.INVALID_COUPON_ISSUE_QUANTITY, "쿠폰 발급 가능 수량이 초과 되었습니다.")
+        }
+
         if (!availableIssueDate())
             throw CouponIssueException(ErrorCode.INVALID_COUPON_ISSUE_DATE, "쿠폰 발급 가능 기간이 아닙니다.")
     }

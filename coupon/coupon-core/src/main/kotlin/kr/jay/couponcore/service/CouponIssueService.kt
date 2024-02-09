@@ -2,10 +2,14 @@ package kr.jay.couponcore.service
 
 import kr.jay.couponcore.exception.CouponIssueException
 import kr.jay.couponcore.exception.ErrorCode
+import kr.jay.couponcore.model.Coupon
 import kr.jay.couponcore.model.CouponIssue
+import kr.jay.couponcore.model.event.CouponIssueCompleteEvent
 import kr.jay.couponcore.repository.mysql.CouponIssueJpaRepository
 import kr.jay.couponcore.repository.mysql.CouponIssueRepository
 import kr.jay.couponcore.repository.mysql.CouponJpaRepository
+import org.springframework.context.ApplicationEvent
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,7 +26,8 @@ import org.springframework.transaction.annotation.Transactional
 class CouponIssueService(
     private val couponJpaRepository: CouponJpaRepository,
     private val couponIssueJpaRepository: CouponIssueJpaRepository,
-    private val couponIssueRepository: CouponIssueRepository
+    private val couponIssueRepository: CouponIssueRepository,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
 
     @Transactional
@@ -30,6 +35,7 @@ class CouponIssueService(
         val coupon = findCouponWithLock(couponId)
             .apply { issue() }
         saveCouponIssue(coupon.id!!, userId)
+        publishCouponIssueEvent(coupon)
     }
 
     @Transactional(readOnly = true)
@@ -61,5 +67,11 @@ class CouponIssueService(
                     "이미 발급된 쿠폰입니다. couponId: $couponId, userId: $userId"
                 )
             }
+    }
+
+    private fun publishCouponIssueEvent(coupon: Coupon) {
+        if(coupon.isIssueComplete()){
+            eventPublisher.publishEvent(CouponIssueCompleteEvent(coupon.id!!))
+        }
     }
 }

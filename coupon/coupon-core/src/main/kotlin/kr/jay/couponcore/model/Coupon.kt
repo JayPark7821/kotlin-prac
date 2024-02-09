@@ -69,6 +69,8 @@ class Coupon(
         return dateIssueStart.isBefore(now) && dateIssueEnd.isAfter(now)
     }
 
+    fun isIssueComplete() = dateIssueEnd.isBefore(LocalDateTime.now()) || !availableIssueQuantity()
+
     fun issue() {
         if (!availableIssueQuantity()) {
             throw CouponIssueException(
