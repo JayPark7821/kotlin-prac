@@ -8,10 +8,8 @@ import kr.jay.couponcore.model.Coupon
 import kr.jay.couponcore.model.CouponType
 import kr.jay.couponcore.repository.mysql.CouponJpaRepository
 import kr.jay.couponcore.repository.redis.dto.CouponIssueRequest
-import kr.jay.couponcore.utils.CouponRedisUtils.Companion.getIssueRequestKey
-import kr.jay.couponcore.utils.CouponRedisUtils.Companion.getIssueRequestQueueKey
+import kr.jay.couponcore.utils.CouponRedisUtils
 import org.assertj.core.api.Assertions
-import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,16 +20,16 @@ import java.time.LocalDateTime
 import java.util.stream.IntStream
 
 /**
- * AsyncCouponIssueServiceV1Test
+ * AsyncCouponIssueServiceV2Test
  *
  * @author jaypark
  * @version 1.0.0
- * @since 2/7/24
+ * @since 2/8/24
  */
-class AsyncCouponIssueServiceV1Test : TestConfig(){
+class AsyncCouponIssueServiceV2Test: TestConfig(){
 
     @Autowired
-    lateinit var sut: AsyncCouponIssueServiceV1
+    lateinit var sut: AsyncCouponIssueServiceV2
 
     @Autowired
     lateinit var redisTemplate: RedisTemplate<String, String>
@@ -52,7 +50,7 @@ class AsyncCouponIssueServiceV1Test : TestConfig(){
         val couponId: Long = 1
         val userId: Long = 1
 
-        assertThatThrownBy {
+        Assertions.assertThatThrownBy {
             sut.issue(couponId, userId)
         }.isInstanceOfSatisfying(CouponIssueException::class.java) { exception ->
             assertEquals(exception.errorCode, ErrorCode.COUPON_NOT_EXIST)
@@ -74,10 +72,10 @@ class AsyncCouponIssueServiceV1Test : TestConfig(){
         }
 
         IntStream.range(0, coupon.totalQuantity!!.toInt()).forEach { idx->
-            redisTemplate.opsForSet().add(getIssueRequestKey(coupon.id!!), idx.toString())
+            redisTemplate.opsForSet().add(CouponRedisUtils.getIssueRequestKey(coupon.id!!), idx.toString())
         }
 
-        assertThatThrownBy {
+        Assertions.assertThatThrownBy {
             sut.issue(coupon.id!!, userId)
         }.isInstanceOfSatisfying(CouponIssueException::class.java) { exception ->
             assertEquals(exception.errorCode, ErrorCode.INVALID_COUPON_ISSUE_QUANTITY)
@@ -97,9 +95,9 @@ class AsyncCouponIssueServiceV1Test : TestConfig(){
             ReflectionTestUtils.setField(it, "issuedQuantity", 0)
             couponJpaRepository.save(it)
         }
-        redisTemplate.opsForSet().add(getIssueRequestKey(coupon.id!!), userId.toString())
+        redisTemplate.opsForSet().add(CouponRedisUtils.getIssueRequestKey(coupon.id!!), userId.toString())
 
-        assertThatThrownBy {
+        Assertions.assertThatThrownBy {
             sut.issue(coupon.id!!, userId)
         }.isInstanceOfSatisfying(CouponIssueException::class.java) { exception ->
             assertEquals(exception.errorCode, ErrorCode.DUPLICATED_COUPON_ISSUE)
@@ -119,9 +117,9 @@ class AsyncCouponIssueServiceV1Test : TestConfig(){
             ReflectionTestUtils.setField(it, "issuedQuantity", 0)
             couponJpaRepository.save(it)
         }
-        redisTemplate.opsForSet().add(getIssueRequestKey(coupon.id!!), userId.toString())
+        redisTemplate.opsForSet().add(CouponRedisUtils.getIssueRequestKey(coupon.id!!), userId.toString())
 
-        assertThatThrownBy {
+        Assertions.assertThatThrownBy {
             sut.issue(coupon.id!!, userId)
         }.isInstanceOfSatisfying(CouponIssueException::class.java) { exception ->
             assertEquals(exception.errorCode, ErrorCode.INVALID_COUPON_ISSUE_DATE)
@@ -144,8 +142,8 @@ class AsyncCouponIssueServiceV1Test : TestConfig(){
 
         sut.issue(coupon.id!!, userId)
 
-        redisTemplate.opsForSet().isMember(getIssueRequestKey(coupon.id!!), userId.toString()).let {
-            assertThat(it).isTrue
+        redisTemplate.opsForSet().isMember(CouponRedisUtils.getIssueRequestKey(coupon.id!!), userId.toString()).let {
+            Assertions.assertThat(it).isTrue
         }
     }
 
@@ -164,8 +162,9 @@ class AsyncCouponIssueServiceV1Test : TestConfig(){
         }
 
         sut.issue(coupon.id!!, userId)
-        redisTemplate.opsForList().leftPop(getIssueRequestQueueKey()).let {
-            assertThat(it).isEqualTo(objectMapper.writeValueAsString(CouponIssueRequest(coupon.id!!, userId)))
+        redisTemplate.opsForList().leftPop(CouponRedisUtils.getIssueRequestQueueKey()).let {
+            Assertions.assertThat(it)
+                .isEqualTo(objectMapper.writeValueAsString(CouponIssueRequest(coupon.id!!, userId)))
         }
     }
 }
