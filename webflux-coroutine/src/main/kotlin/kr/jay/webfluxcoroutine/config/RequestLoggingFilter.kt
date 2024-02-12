@@ -28,6 +28,13 @@ private val logger = KotlinLogging.logger {}
 class RequestLoggingFilter : WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val request = exchange.request
+
+        logger.info{"uri: [${request.method}] ${request.path}, ip: ${request.remoteAddress}"}
+
+        if(request.queryParams.isNotEmpty()){
+            logger.debug { "query params: ${request.queryParams}" }
+        }
+
         val loggingRequest = object : ServerHttpRequestDecorator(request) {
             override fun getBody(): Flux<DataBuffer> {
                 return super.getBody().doOnNext { buffer ->
