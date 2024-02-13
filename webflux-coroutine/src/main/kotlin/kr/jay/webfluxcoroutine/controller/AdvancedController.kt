@@ -3,6 +3,7 @@ package kr.jay.webfluxcoroutine.controller
 import jakarta.validation.*
 import jakarta.validation.constraints.*
 import kr.jay.webfluxcoroutine.config.validator.DateString
+import kr.jay.webfluxcoroutine.exception.ExternalApi
 import kr.jay.webfluxcoroutine.exception.InvalidParameter
 import kr.jay.webfluxcoroutine.service.AdvancedService
 import mu.KotlinLogging
@@ -10,10 +11,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.validation.BindException
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.WebDataBinder
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
@@ -32,6 +30,7 @@ private val logger = KotlinLogging.logger {}
 @RestController
 class AdvancedController(
     private val service: AdvancedService,
+    private val externalApi: ExternalApi,
 ) {
 
     @GetMapping("/test/mdc")
@@ -54,6 +53,16 @@ class AdvancedController(
             throw InvalidParameter(request, request::message, code = "customCode", message = "custom error")
         }
 //        throw RuntimeException("yahooooooo !! ")
+    }
+
+    @GetMapping("/external/delay")
+    suspend fun delay(){
+        externalApi.delay()
+    }
+
+    @GetMapping("/external/circuit/{flag}", "/external/circuit", "/external/circuit/")
+    suspend fun testCircuitBreaker(@PathVariable flag: String): String {
+        return externalApi.testCircuitBreaker(flag)
     }
 }
 
