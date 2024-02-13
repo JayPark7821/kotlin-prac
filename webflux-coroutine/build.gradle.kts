@@ -41,6 +41,8 @@ dependencies {
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	implementation("io.github.resilience4j:resilience4j-all:2.1.0")
+	implementation("io.github.resilience4j:resilience4j-kotlin:2.1.0")
 
 	runtimeOnly("org.mariadb:r2dbc-mariadb:1.1.3")
 	runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
