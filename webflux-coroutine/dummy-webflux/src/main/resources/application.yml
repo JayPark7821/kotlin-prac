@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: dummy-webflux
+server:
+  port: 8081
