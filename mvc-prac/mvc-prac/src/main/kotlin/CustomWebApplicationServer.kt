@@ -1,5 +1,9 @@
 import org.slf4j.LoggerFactory
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.DataOutputStream
 import java.net.ServerSocket
+import java.nio.charset.StandardCharsets
 
 /**
  * CustomWebApplicationServer
@@ -20,9 +24,20 @@ class CustomWebApplicationServer(
 
         logger.info("Server waiting for client connection...")
 
-        while ((serverSocket.accept()) !=null){
-            logger.info("client connected")
-        }
+        while (true){
+            val clientSocket = serverSocket.accept()
 
+            logger.info("client connected")
+
+            val inputStream = clientSocket.getInputStream()
+
+            val reader = BufferedReader(InputStreamReader(inputStream, StandardCharsets.UTF_8))
+
+            while(reader.ready()){
+                val line = reader.readLine()
+                logger.info("received: $line")
+            }
+            serverSocket.close()
+        }
     }
 }
