@@ -1,4 +1,3 @@
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -17,6 +16,6 @@ class RequestLineTest {
         assertThat("requestLine").isNotNull()
         assertThat(requestLine.method).isEqualTo("GET")
         assertThat(requestLine.urlPath).isEqualTo("/calculator")
-        assertThat(requestLine.queryString).isEqualTo("operand1=11&operator=*&operand2=55")
+        assertThat(requestLine.queryStrings).isEqualTo("operand1=11&operator=*&operand2=55")
     }
 }
