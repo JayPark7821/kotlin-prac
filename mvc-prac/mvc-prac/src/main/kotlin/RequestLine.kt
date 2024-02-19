@@ -9,11 +9,12 @@ class RequestLine constructor(
     /**
      * GET /calculator?operand1=11&operator=*&operand2=55 HTTP/1.1
      */
-    private val requestLine: String,
-){
+    requestLine: String,
+) {
+
     val method: String
     val urlPath: String
-    val queryString: String?
+    val queryStrings: QueryStrings?
 
     init {
         val token = requestLine.split(" ")
@@ -21,9 +22,14 @@ class RequestLine constructor(
         val urlPathTokens = token[1].split("?")
         this.urlPath = urlPathTokens[0]
 
-        if(urlPathTokens.size > 1)
-            this.queryString = urlPathTokens[1]
+        if (urlPathTokens.size > 1)
+            this.queryStrings = QueryStrings(urlPathTokens[1])
         else
-            this.queryString = null
+            this.queryStrings = null
     }
+
+    fun isGetRequest() = "GET".equals(this.method, ignoreCase = true)
+    fun matchPath(path: String) = this.urlPath == path
+    fun getQueryStrings() = this.queryStrings
+
 }

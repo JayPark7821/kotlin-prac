@@ -19,6 +19,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.2.3")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("org.assertj:assertj-core:3.23.1")
 }
 
 tasks.test {
