@@ -16,6 +16,6 @@ class RequestLineTest {
         assertThat("requestLine").isNotNull()
         assertThat(requestLine.method).isEqualTo("GET")
         assertThat(requestLine.urlPath).isEqualTo("/calculator")
-        assertThat(requestLine.queryStrings).isEqualTo("operand1=11&operator=*&operand2=55")
+        assertThat(requestLine.userQueryStrings).isEqualTo("operand1=11&operator=*&operand2=55")
     }
 }

@@ -8,11 +8,11 @@ import org.junit.jupiter.api.Test
  * @version 1.0.0
  * @since 2/19/24
  */
-class QueryStringsTest {
+class UserQueryStringsTest {
 
     @Test
     fun case1(){
-        val queryStrings = QueryStrings("operand1=11&operator=*&operand2=55")
-        assertThat(queryStrings).isNotNull()
+        val userQueryStrings = UserQueryStrings("operand1=11&operator=*&operand2=55")
+        assertThat(userQueryStrings).isNotNull()
     }
 }

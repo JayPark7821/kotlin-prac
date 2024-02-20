@@ -5,7 +5,7 @@
  * @version 1.0.0
  * @since 2/19/24
  */
-class QueryStrings(
+class UserQueryStrings(
     queryStringLine: String,
 ) {
     val queryStrings: List<QueryString> =

@@ -14,7 +14,7 @@ class RequestLine constructor(
 
     val method: String
     val urlPath: String
-    val queryStrings: QueryStrings?
+    val userQueryStrings: UserQueryStrings?
 
     init {
         val token = requestLine.split(" ")
@@ -23,13 +23,13 @@ class RequestLine constructor(
         this.urlPath = urlPathTokens[0]
 
         if (urlPathTokens.size > 1)
-            this.queryStrings = QueryStrings(urlPathTokens[1])
+            this.userQueryStrings = UserQueryStrings(urlPathTokens[1])
         else
-            this.queryStrings = null
+            this.userQueryStrings = null
     }
 
     fun isGetRequest() = "GET".equals(this.method, ignoreCase = true)
     fun matchPath(path: String) = this.urlPath == path
-    fun getQueryStrings() = this.queryStrings
+    fun getQueryStrings() = this.userQueryStrings
 
 }
