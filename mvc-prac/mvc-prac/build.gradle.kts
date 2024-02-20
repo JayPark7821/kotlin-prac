@@ -16,8 +16,7 @@ dependencies {
     implementation("javax.servlet:javax.servlet-api:4.0.1")
     implementation("javax.servlet:jstl:1.2")
 
-    implementation("ch.qos.logback:logback-classic:1.2.3")
-
+    implementation("io.github.microutils:kotlin-logging:3.0.5")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.assertj:assertj-core:3.23.1")
 }
