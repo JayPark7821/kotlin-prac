@@ -27,38 +27,8 @@ class CustomWebApplicationServer(
 
         while (true) {
             val clientSocket = serverSocket.accept()
-
             logger.info("client connected")
-
-            val inputStream = clientSocket.getInputStream()
-
-            val reader = BufferedReader(InputStreamReader(inputStream, StandardCharsets.UTF_8))
-
-            while (reader.ready()) {
-                val httpRequest = HttpRequest(reader)
-                val dos = DataOutputStream(clientSocket.getOutputStream())
-
-                if (httpRequest.isGetRequest() && httpRequest.matchPath("/calculator")) {
-                    val userQueryStrings: UserQueryStrings? = httpRequest.getQueryStrings()
-                    val operand1 = userQueryStrings?.getValue("operand1")?.toInt() ?: 0
-                    val operand2 = userQueryStrings?.getValue("operand2")?.toInt() ?: 0
-                    val operator = userQueryStrings?.getValue("operator") ?: ""
-
-                    val result = when (operator) {
-                        "+" -> operand1 + operand2
-                        "-" -> operand1 - operand2
-                        "*" -> operand1 * operand2
-                        "/" -> operand1 / operand2
-                        else -> 0
-                    }
-
-                    val body = result.toString().toByteArray(StandardCharsets.UTF_8)
-                    val response = HttpResponse(dos)
-                    response.response200Header("application/json", body.size)
-                    response.responseBody(body)
-                }
-            }
-            serverSocket.close()
+            Thread(ClientRequestHandler(clientSocket)).start()
         }
     }
 }
