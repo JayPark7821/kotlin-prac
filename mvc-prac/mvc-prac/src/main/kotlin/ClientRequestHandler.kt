@@ -1,4 +1,3 @@
-import mu.KotlinLogging
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
 import java.io.DataOutputStream
@@ -13,12 +12,12 @@ import java.nio.charset.StandardCharsets
  * @version 1.0.0
  * @since 2/20/24
  */
-private val logger = KotlinLogging.logger {}
 
 class ClientRequestHandler(
     private val clientSocket: Socket
 ):Runnable {
 
+    private val logger = LoggerFactory.getLogger(ClientRequestHandler::class.java)
     override fun run() {
 
         logger.info("new client ${Thread.currentThread().name} started")

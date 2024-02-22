@@ -1,3 +1,5 @@
 GET http://localhost:8089
 ###
 GET http://localhost:8089/calculator?operand1=11&operator=*&operand2=55
+###
+GET http://localhost:8080/calculate?operand1=11&operator=%2b&operand2=55
