@@ -17,6 +17,7 @@ class RequestMappingHandlerMapping {
         mapping[HandlerKey(RequestMethod.GET, "/")] = HomeController()
         mapping[HandlerKey(RequestMethod.GET,"/users")] = UserListController()
         mapping[HandlerKey(RequestMethod.POST,"/users")] = UserCreateController()
+        mapping[HandlerKey(RequestMethod.GET,"/users/form")] = ForwardController("/user/form.jsp")
     }
 
     fun findHandler(handlerKey: HandlerKey): Controller{
