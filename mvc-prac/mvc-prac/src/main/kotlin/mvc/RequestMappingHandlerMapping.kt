@@ -1,7 +1,6 @@
 package mvc
 
-import mvc.controller.Controller
-import mvc.controller.HomeController
+import mvc.controller.*
 
 /**
  * RequestMappingHandlerMapping
@@ -12,13 +11,15 @@ import mvc.controller.HomeController
  */
 class RequestMappingHandlerMapping {
 
-    private var mapping = mutableMapOf<String, Controller>()
+    private var mapping = mutableMapOf<HandlerKey, Controller>()
 
     fun init(){
-        mapping["/"] = HomeController()
+        mapping[HandlerKey(RequestMethod.GET, "/")] = HomeController()
+        mapping[HandlerKey(RequestMethod.GET,"/users")] = UserListController()
+        mapping[HandlerKey(RequestMethod.POST,"/users")] = UserCreateController()
     }
 
-    fun findHandler(urlPath: String): Controller{
-        return mapping[urlPath] ?: throw IllegalArgumentException("Not found")
+    fun findHandler(handlerKey: HandlerKey): Controller{
+        return mapping[handlerKey] ?: throw IllegalArgumentException("Not found")
     }
 }
