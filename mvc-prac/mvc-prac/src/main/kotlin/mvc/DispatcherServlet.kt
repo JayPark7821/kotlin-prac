@@ -1,6 +1,10 @@
 package mvc
 
+import mvc.controller.RequestMethod
+import mvc.view.JspViewResolver
+import mvc.view.ViewResolver
 import org.slf4j.LoggerFactory
+import java.util.*
 import javax.servlet.annotation.WebServlet
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
@@ -20,19 +24,22 @@ private val log = LoggerFactory.getLogger(DispatcherServlet::class.java)
 class DispatcherServlet: HttpServlet(){
 
     private val requestMappingHandlerMapping = RequestMappingHandlerMapping()
-
+    private lateinit var viewResolver: List<ViewResolver>
     override fun init() {
         requestMappingHandlerMapping.init()
+        viewResolver = Collections.singletonList(JspViewResolver())
     }
 
     override fun service(request: HttpServletRequest, response: HttpServletResponse) {
         log.info("Dispatcher Servlet")
-        val controller = requestMappingHandlerMapping.findHandler(request.requestURI)
+        val controller = requestMappingHandlerMapping.findHandler(
+            HandlerKey(RequestMethod.valueOf(request.method),request.requestURI)
+        )
 
         val viewName = controller.handleRequest(request, response)
-
-        val requestDispatcher = request.getRequestDispatcher(viewName)
-
-        requestDispatcher.forward(request, response)
+        viewResolver.forEach {
+            val view = it.resolve(viewName)
+            view.render(mapOf(), request, response)
+        }
     }
 }
