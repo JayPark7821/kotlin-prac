@@ -22,7 +22,7 @@
     <c:forEach items="${users}" var="user" varStatus="status">
         <tr>
             <th scope="row">${status.count}</th>
-            <td>${user.userId}</td>
+            <td>${user.id}</td>
             <td>${user.name}</td>
             </td>
         </tr>

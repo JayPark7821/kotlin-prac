@@ -16,6 +16,10 @@ class UserRepository {
         fun save(user: User) {
             users[user.id] = user
         }
+
+        fun findAll(): List<User> {
+            return users.values.toList()
+        }
     }
 
 

@@ -12,6 +12,6 @@ import javax.servlet.http.HttpServletResponse
  */
 class HomeController : Controller {
     override fun handleRequest(request: HttpServletRequest, response: HttpServletResponse): String {
-        return "home.jsp"
+        return "home"
     }
 }

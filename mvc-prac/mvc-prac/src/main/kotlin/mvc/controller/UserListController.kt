@@ -1,5 +1,6 @@
 package mvc.controller
 
+import mvc.repository.UserRepository
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -13,8 +14,8 @@ import javax.servlet.http.HttpServletResponse
  */
 class UserListController:Controller {
     override fun handleRequest(request: HttpServletRequest, response: HttpServletResponse):String{
-        request.setAttribute("users", listOf<String>())
-        return "/user/list.jsp"
+        request.setAttribute("users", UserRepository.findAll())
+        return "/user/list"
     }
 
 }

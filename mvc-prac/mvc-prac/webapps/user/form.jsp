@@ -10,8 +10,8 @@
 <body>
 <form method="post" action="/users">
     <div>
-        <label for="userId">사용자 아이디</label>
-        <input class="form-control" id="userId" name="userId" placeholder="User ID">
+        <label for="id">사용자 아이디</label>
+        <input class="form-control" id="id" name="id" placeholder="User ID">
     </div>
     <div>
         <label for="name">이름</label>
