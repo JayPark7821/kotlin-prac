@@ -5,6 +5,7 @@ import mvc.view.JspViewResolver
 import mvc.view.ViewResolver
 import org.slf4j.LoggerFactory
 import java.util.*
+import javax.servlet.ServletException
 import javax.servlet.annotation.WebServlet
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
@@ -25,9 +26,11 @@ class DispatcherServlet: HttpServlet(){
 
     private val requestMappingHandlerMapping = RequestMappingHandlerMapping()
     private lateinit var viewResolver: List<ViewResolver>
+    private lateinit var handlerAdapters: List<HandlerAdapter>
     override fun init() {
         requestMappingHandlerMapping.init()
         viewResolver = Collections.singletonList(JspViewResolver())
+        handlerAdapters = listOf(SimpleControllerHandlerAdapter())
     }
 
     override fun service(request: HttpServletRequest, response: HttpServletResponse) {
@@ -36,10 +39,13 @@ class DispatcherServlet: HttpServlet(){
             HandlerKey(RequestMethod.valueOf(request.method),request.requestURI)
         )
 
-        val viewName = controller.handleRequest(request, response)
+        val modelAndView = (handlerAdapters.findLast { it.supports(controller) }
+            ?.handle(request, response, controller)
+            ?: throw ServletException("handler adapter not found"))
+
         viewResolver.forEach {
-            val view = it.resolve(viewName)
-            view.render(mapOf(), request, response)
+            val view = it.resolve(modelAndView.viewName()!!)
+            view.render(modelAndView.model, request, response)
         }
     }
 }
