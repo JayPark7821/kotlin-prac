@@ -3,6 +3,7 @@ package kr.jay.webfluxcoroutine.controller
 import kotlinx.coroutines.flow.Flow
 import kr.jay.webfluxcoroutine.model.Article
 import kr.jay.webfluxcoroutine.service.ArticleService
+import kr.jay.webfluxcoroutine.service.QryArticle
 import kr.jay.webfluxcoroutine.service.ReqCreate
 import kr.jay.webfluxcoroutine.service.ReqUpdate
 import org.springframework.http.HttpStatus
@@ -36,6 +37,11 @@ class ArticleController(
     @GetMapping("/all")
     suspend fun getAll(@RequestParam title: String?): Flow<Article> {
         return service.getAll(title)
+    }
+
+    @GetMapping("/all")
+    suspend fun getAll(request: QryArticle): Flow<Article> {
+        return service.getAll(request)
     }
 
     @PutMapping("/{id}")

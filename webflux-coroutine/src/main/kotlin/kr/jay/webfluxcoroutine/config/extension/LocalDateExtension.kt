@@ -11,8 +11,8 @@ import java.time.format.DateTimeFormatter
  * @since 1/2/24
  */
 
-fun String.toLocalDate(format: String = "yyyy-MM-dd"): LocalDate{
-    return LocalDate.parse(this, DateTimeFormatter.ofPattern(format))
+fun String.toLocalDate(format: String = "yyyyMMdd"): LocalDate{
+    return LocalDate.parse(this. filter { it.isDigit() }, DateTimeFormatter.ofPattern(format))
 }
 
 fun LocalDate.toString(format: String = "yyyyMMdd"): String{

@@ -29,10 +29,9 @@ annotation class DateString(
 class DataValidator : ConstraintValidator<DateString, String> {
     override fun isValid(value: String?, context: ConstraintValidatorContext?): Boolean {
         val text = value?.filter { it.isDigit() } ?: return true
-        val format = "yyyyMMdd"
         return runCatching {
-            text.toLocalDate(format).let {
-                if (text != it.toString(format)) null else true
+            text.toLocalDate().let {
+                if (text != it.toString("yyyyMMdd")) null else true
             }
         }.getOrNull() != null
     }
