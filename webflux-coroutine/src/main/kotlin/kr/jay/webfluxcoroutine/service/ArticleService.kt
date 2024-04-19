@@ -1,10 +1,15 @@
 package kr.jay.webfluxcoroutine.service
 
 import kotlinx.coroutines.flow.Flow
+import kr.jay.webfluxcoroutine.config.extension.toLocalDate
+import kr.jay.webfluxcoroutine.config.validator.DateString
 import kr.jay.webfluxcoroutine.exception.NoArticleFoundException
 import kr.jay.webfluxcoroutine.model.Article
 import kr.jay.webfluxcoroutine.repository.ArticleRepository
+import org.springframework.r2dbc.core.DatabaseClient
+import org.springframework.r2dbc.core.flow
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 /**
  * ArticleService
@@ -17,6 +22,7 @@ import org.springframework.stereotype.Service
 @Service
 class ArticleService(
     private val repository: ArticleRepository,
+    private val dbClient: DatabaseClient,
 ) {
 
     suspend fun create(request: ReqCreate): Article {
@@ -35,9 +41,62 @@ class ArticleService(
         }
     }
 
-    suspend fun delete(id: Long) {
-       return repository.deleteById(id)
+    suspend fun getAll(request: QryArticle): Flow<Article> {
+        val params = HashMap<String, Any>()
+        var sql = dbClient.sql(
+            """
+            SELECT id, title, body, author_id, created_at, updated_at
+            FROM TB_ARTICLE
+            WHERE 1=1
+            ${
+                request.title.query {
+                    params["title"] = it.trim().let { "%$it%" }
+                    "AND title LIKE :title"
+                }
+            }
+
+            ${
+                request.authorIds.query {
+                    params["authorIds"] = it
+                    "AND author_id IN (:authorIds)"
+                }
+            }
+            ${
+                request.from.query {
+                    params["from"] = it.toLocalDate()
+                    "AND created_at >= :from"
+                }
+            }
+            ${
+                request.to.query {
+                    params["to"] = it.toLocalDate().plusDays(1)
+                    "AND created_at < :to"
+                }
+            }
+        """.trimIndent())
+        params.forEach{ (key, value) -> sql = sql.bind(key, value) }
+        return sql.map{ row ->
+            Article(
+                id = row.get("id") as Long,
+                title = row.get("title") as String,
+                body = row.get("body") as String,
+                authorId = row.get("author_id") as Long,
+            ).apply {
+                createdAt = row.get("created_at") as LocalDateTime?
+                updatedAt = row.get("updated_at") as LocalDateTime?
+            }
+        }.flow()
     }
+
+//            if (request.title.isNullOrBlank()) "" else {
+//                params["title"] = request.title.trim().let { "%$it%" }
+//                "AND title LIKE :title"
+//            }
+
+    suspend fun delete(id: Long) {
+        return repository.deleteById(id)
+    }
+
     suspend fun update(id: Long, request: ReqUpdate): Article {
         val article = repository.findById(id) ?: throw NoArticleFoundException("id: $id")
         return repository.save(article.apply {
@@ -45,6 +104,15 @@ class ArticleService(
             request.body?.let { this.body = it }
             request.authorId?.let { this.authorId = it }
         })
+    }
+}
+
+fun <T> T?.query(f: (T) -> String): String {
+    return when {
+        this == null -> ""
+        this is String && this.isBlank() -> ""
+        this is Collection<*> && this.isEmpty() -> ""
+        else -> f.invoke(this)
     }
 }
 
@@ -67,3 +135,12 @@ data class ReqCreate(
         )
     }
 }
+
+data class QryArticle(
+    val title: String?,
+    val authorIds: List<Long>?,
+    @DateString
+    val from: String?,
+    @DateString
+    val to: String?,
+)
