@@ -39,7 +39,7 @@ class ArticleController(
         return service.getAll(title)
     }
 
-    @GetMapping("/all")
+    @GetMapping("/all/qry")
     suspend fun getAll(request: QryArticle): Flow<Article> {
         return service.getAll(request)
     }
