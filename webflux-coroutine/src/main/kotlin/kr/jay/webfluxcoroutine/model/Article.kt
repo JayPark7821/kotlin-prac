@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.relational.core.mapping.Table
+import java.io.Serializable
 import java.time.LocalDateTime
 
 /**
@@ -42,6 +43,6 @@ open class BaseEntity(
     var createdAt: LocalDateTime? = null,
     @LastModifiedDate
     var updatedAt: LocalDateTime? = null,
-) {
+): Serializable {
     override fun toString(): String = "createdAt=$createdAt, updatedAt=$updatedAt"
 }

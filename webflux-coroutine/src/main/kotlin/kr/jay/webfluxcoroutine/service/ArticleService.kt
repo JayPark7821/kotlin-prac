@@ -1,15 +1,19 @@
 package kr.jay.webfluxcoroutine.service
 
 import kotlinx.coroutines.flow.Flow
+import kr.jay.webfluxcoroutine.config.CacheKey
+import kr.jay.webfluxcoroutine.config.CacheManager
 import kr.jay.webfluxcoroutine.config.extension.toLocalDate
 import kr.jay.webfluxcoroutine.config.validator.DateString
 import kr.jay.webfluxcoroutine.exception.NoArticleFoundException
 import kr.jay.webfluxcoroutine.model.Article
 import kr.jay.webfluxcoroutine.repository.ArticleRepository
+import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.r2dbc.core.flow
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * ArticleService
@@ -23,14 +27,27 @@ import java.time.LocalDateTime
 class ArticleService(
     private val repository: ArticleRepository,
     private val dbClient: DatabaseClient,
+    private val cache: CacheManager,
+    redisTemplate: ReactiveRedisTemplate<Any, Any>,
 ) {
+
+    private val ops = redisTemplate.opsForValue()
+
+    init {
+        cache.TTL["article/get"] = 10.seconds
+    }
 
     suspend fun create(request: ReqCreate): Article {
         return repository.save(request.toArticle())
     }
 
     suspend fun get(id: Long): Article {
-        return repository.findById(id) ?: throw NoArticleFoundException("id: $id")
+        val key = CacheKey("/article/get", id)
+//        return cache.get(key)
+//            ?: repository.findById(id)?.also{cache.set(key, it)}
+//            ?: throw NoArticleFoundException("id: $id")
+        return cache.get(key) { repository.findById(id) }
+            ?: throw NoArticleFoundException("id: $id")
     }
 
     suspend fun getAll(title: String? = null): Flow<Article> {
@@ -74,8 +91,8 @@ class ArticleService(
                 }
             }
         """.trimIndent())
-        params.forEach{ (key, value) -> sql = sql.bind(key, value) }
-        return sql.map{ row ->
+        params.forEach { (key, value) -> sql = sql.bind(key, value) }
+        return sql.map { row ->
             Article(
                 id = row.get("id") as Long,
                 title = row.get("title") as String,
@@ -94,7 +111,10 @@ class ArticleService(
 //            }
 
     suspend fun delete(id: Long) {
-        return repository.deleteById(id)
+        return repository.deleteById(id).also {
+            val key = CacheKey("/article/get", id)
+            cache.delete(key)
+        }
     }
 
     suspend fun update(id: Long, request: ReqUpdate): Article {
@@ -103,7 +123,10 @@ class ArticleService(
             request.title?.let { this.title = it }
             request.body?.let { this.body = it }
             request.authorId?.let { this.authorId = it }
-        })
+        }).also {
+            val key = CacheKey("/article/get", id)
+            cache.delete(key)
+        }
     }
 }
 
