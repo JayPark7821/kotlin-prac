@@ -24,7 +24,7 @@ class AccountService(
 
     @Transactional
     suspend fun deposit(id: Long, amount: Long) {
-        repository.findById(id)?.let { account ->
+        repository.findArticleById(id)?.let { account ->
             account.balance += amount
             repository.save(account)
         } ?: throw NoAccountFoundException("id: $id")
