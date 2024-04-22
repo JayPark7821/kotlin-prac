@@ -1,21 +1,15 @@
 package kr.jay.webfluxcoroutine.controller
 
-import jakarta.validation.*
+import jakarta.validation.Valid
 import jakarta.validation.constraints.*
 import kr.jay.webfluxcoroutine.config.validator.DateString
 import kr.jay.webfluxcoroutine.exception.ExternalApi
 import kr.jay.webfluxcoroutine.exception.InvalidParameter
+import kr.jay.webfluxcoroutine.service.AccountService
 import kr.jay.webfluxcoroutine.service.AdvancedService
+import kr.jay.webfluxcoroutine.service.ResAccount
 import mu.KotlinLogging
-import org.springframework.http.HttpStatus
-import org.springframework.validation.BindException
-import org.springframework.validation.BindingResult
-import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
 
 /**
  * AdvancedController
@@ -31,6 +25,7 @@ private val logger = KotlinLogging.logger {}
 class AdvancedController(
     private val service: AdvancedService,
     private val externalApi: ExternalApi,
+    private val accountService: AccountService,
 ) {
 
     @GetMapping("/test/mdc")
@@ -56,7 +51,7 @@ class AdvancedController(
     }
 
     @GetMapping("/external/delay")
-    suspend fun delay(){
+    suspend fun delay() {
         externalApi.delay()
     }
 
@@ -64,8 +59,16 @@ class AdvancedController(
     suspend fun testCircuitBreaker(@PathVariable flag: String): String {
         return externalApi.testCircuitBreaker(flag)
     }
-}
 
+    @GetMapping("/account/{id}")
+    suspend fun getAccount(@PathVariable("id") id: Long) = accountService.get(id)
+
+    @PutMapping("/account/{id}/{amount}")
+    suspend fun deposit(@PathVariable("id") id: Long, @PathVariable("amount") amount: Long) : ResAccount{
+        accountService.deposit(id, amount)
+        return accountService.get(id)
+    }
+}
 
 
 data class ReqErrorTest(

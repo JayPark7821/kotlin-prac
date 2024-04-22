@@ -2,8 +2,8 @@ package kr.jay.webfluxcoroutine.model
 
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Table
 import java.io.Serializable
 import java.time.LocalDateTime
@@ -23,7 +23,10 @@ class Article(
     var title: String,
     var body: String,
     var authorId: Long,
-) :BaseEntity(){
+    var balance: Long = 0,
+    @Version
+    var version: Int = 1
+) : BaseEntity() {
     override fun toString(): String =
         "Article(id=$id, title='$title', body='$body', authorId=$authorId, ${super.toString()})"
 
@@ -43,6 +46,6 @@ open class BaseEntity(
     var createdAt: LocalDateTime? = null,
     @LastModifiedDate
     var updatedAt: LocalDateTime? = null,
-): Serializable {
+) : Serializable {
     override fun toString(): String = "createdAt=$createdAt, updatedAt=$updatedAt"
 }

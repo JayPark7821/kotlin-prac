@@ -1,6 +1,9 @@
 package kr.jay.webfluxcoroutine.service
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.toList
 import kr.jay.webfluxcoroutine.config.CacheKey
 import kr.jay.webfluxcoroutine.config.CacheManager
 import kr.jay.webfluxcoroutine.config.extension.toLocalDate
@@ -12,6 +15,7 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.r2dbc.core.flow
 import org.springframework.stereotype.Service
+import java.io.Serializable
 import java.time.LocalDateTime
 import kotlin.time.Duration.Companion.seconds
 
@@ -35,6 +39,7 @@ class ArticleService(
 
     init {
         cache.TTL["article/get"] = 10.seconds
+        cache.TTL["article/get/all"] = 10.seconds
     }
 
     suspend fun create(request: ReqCreate): Article {
@@ -56,6 +61,13 @@ class ArticleService(
         } else {
             repository.findAllByTitleContains(title)
         }
+    }
+
+    suspend fun getAllCached(request: QryArticle): Flow<Article> {
+        val key = CacheKey("/article/get/all", request)
+        return cache.get(key) {
+            getAll(request).toList()
+        }?.asFlow()?: emptyFlow()
     }
 
     suspend fun getAll(request: QryArticle): Flow<Article> {
@@ -166,4 +178,4 @@ data class QryArticle(
     val from: String?,
     @DateString
     val to: String?,
-)
+):Serializable
