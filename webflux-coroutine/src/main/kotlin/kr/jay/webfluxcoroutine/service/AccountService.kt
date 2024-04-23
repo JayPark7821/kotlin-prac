@@ -1,6 +1,8 @@
 package kr.jay.webfluxcoroutine.service
 
+import kr.jay.webfluxcoroutine.config.Locker
 import kr.jay.webfluxcoroutine.model.Article
+import org.springframework.cache.interceptor.SimpleKey
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kr.jay.webfluxcoroutine.exception.NoArticleFoundException as NoAccountFoundException
@@ -16,6 +18,7 @@ import kr.jay.webfluxcoroutine.repository.ArticleRepository as AccountRepository
 @Service
 class AccountService(
     private val repository: AccountRepository,
+    private val locker: Locker,
 ) {
 
     suspend fun get(id: Long): ResAccount {
@@ -24,10 +27,14 @@ class AccountService(
 
     @Transactional
     suspend fun deposit(id: Long, amount: Long) {
-        repository.findArticleById(id)?.let { account ->
-            account.balance += amount
-            repository.save(account)
-        } ?: throw NoAccountFoundException("id: $id")
+        val key = SimpleKey(AccountService::deposit.name, id)
+        return locker.lock(key){
+            repository.findArticleById(id)?.let { account ->
+                account.balance += amount
+                repository.save(account)
+                repository.findArticleById(id)!!
+            } ?: throw NoAccountFoundException("id: $id")
+        }
     }
 }
 
