@@ -12,6 +12,7 @@ spring:
     init:
       mode: always
       schema-locations: classpath:db-init/schema.sql
+      data-locations: classpath:db-init/test-data.sql
   data:
     redis:
       host: localhost
@@ -33,3 +34,15 @@ server:
     include-message: always
     include-exception: true
     include-stacktrace: always
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  r2dbc:
+    url: r2dbc:pool:h2:mem://localhost/payment
+  sql:
+    init:
+      mode: always
+      data-locations: ""
