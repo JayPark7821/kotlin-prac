@@ -22,14 +22,15 @@ import java.util.*
 @Service
 class OrderService(
     private val orderRepository: OrderRepository,
-    private val productRepository: ProductRepository,
     private val productInOrderRepository: ProductInOrderRepository,
+    private val productService: ProductService
 ) {
 
     @Transactional
     suspend fun create(request: ReqCreateOrder): Order {
         val productIds = request.products.map { it.productId }.toSet()
-        val productsById = productRepository.findAllById(productIds).toList().associateBy { it.id }
+//        val productsById = productRepository.findAllById(productIds).toList().associateBy { it.id }
+        val productsById = request.products.map{productService.get(it.productId)}.filterNotNull().associateBy { it.id }
         productIds.filter { !productsById.containsKey(it) }
             .let { remains ->
                 if (remains.isNotEmpty()) {
