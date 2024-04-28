@@ -13,7 +13,7 @@ import java.time.LocalDateTime
  * @version 1.0.0
  * @since 4/23/24
  */
-open class BaseEntity(
+open class  BaseEntity(
     @CreatedDate
     var createdAt: LocalDateTime? = null,
     @LastModifiedDate

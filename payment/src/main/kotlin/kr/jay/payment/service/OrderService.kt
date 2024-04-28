@@ -1,6 +1,7 @@
 package kr.jay.payment.service
 
 import kotlinx.coroutines.flow.toList
+import kr.jay.payment.exception.NoOrderFound
 import kr.jay.payment.exception.NoProductFound
 import kr.jay.payment.model.Order
 import kr.jay.payment.model.PgStatus
@@ -63,6 +64,18 @@ class OrderService(
             )
         }
         return newOrder
+    }
+
+    suspend fun get(orderId: Long): Order {
+        return orderRepository.findById(orderId) ?: throw NoOrderFound("id: $orderId")
+    }
+
+    suspend fun getAll(userId: Long): List<Order>{
+        return orderRepository.findAllByUserIdOrderByCreatedAtDesc(userId)
+    }
+
+    suspend fun delete(orderId: Long){
+        orderRepository.deleteById(orderId)
     }
 }
 
