@@ -32,4 +32,37 @@ class ViewController(
         return "pay.html"
     }
 
+    @GetMapping("/pay/success")
+    suspend fun paySucceed(request: RequestPaySucceed): String {
+        if (!orderService.authSucceed(request))
+            return "pay-fail.html"
+
+        orderService.capture(request)
+        return "pay-success.html"
+    }
+
+    @GetMapping("/pay/fail")
+    suspend fun payFailed(request: RequestPayFailed): String {
+        orderService.authFailed(request)
+        return "pay-fail.html"
+    }
+}
+
+data class RequestPaySucceed(
+    val paymentType: TossPaymentType,
+    val orderId: String,
+    val paymentKey: String,
+    val amount: Long,
+)
+
+data class RequestPayFailed(
+    val code: String,
+    val message: String,
+    val orderId: String
+)
+
+enum class TossPaymentType {
+    NORMAL,
+    BRANDPAY,
+    KEYIN
 }

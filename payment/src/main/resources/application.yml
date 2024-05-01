@@ -39,6 +39,7 @@ server:
 
 payment:
   toss:
+    domain: https://api.tosspayments.com
     key:
       client: test_ck_ttttttqrterqtewrtwertwertewrtwert
       secret: flajewfiojaewiufhawesiufhiAFEIHIWSEUFHeiauwhfiuawhef2

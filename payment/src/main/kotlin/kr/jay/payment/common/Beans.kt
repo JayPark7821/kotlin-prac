@@ -1,6 +1,7 @@
 package kr.jay.payment.common
 
 import kr.jay.payment.repository.ProductInOrderRepository
+import kr.jay.payment.service.OrderService
 import kr.jay.payment.service.ProductService
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
@@ -31,6 +32,10 @@ class Beans : ApplicationContextAware {
 
         val beanProductService: ProductService by lazy {
             getBean(ProductService::class)
+        }
+
+        val beanOrderService: OrderService by lazy {
+            getBean(OrderService::class)
         }
 
 

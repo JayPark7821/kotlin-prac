@@ -61,8 +61,8 @@
     paymentWidget.requestPayment({
       orderId: `[[${order.pgOrderId}]]`,
       orderName: `[[${order.description}]]`,
-      successUrl: window.location.origin + "/success",
-      failUrl: window.location.origin + "/fail",
+      successUrl: "http://localhost:8080/pay/success",
+      failUrl: "http://localhost:8080/pay/fail",
       customerEmail: "customer123@gmail.com",
       customerName: `[[${order.userId}]]`,
       customerMobilePhone: "01012341234",
