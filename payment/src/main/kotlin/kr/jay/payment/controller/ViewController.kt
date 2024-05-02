@@ -49,10 +49,10 @@ class ViewController(
 }
 
 data class RequestPaySucceed(
-    val paymentType: TossPaymentType,
-    val orderId: String,
     val paymentKey: String,
+    val orderId: String,
     val amount: Long,
+    val paymentType: TossPaymentType,
 )
 
 data class RequestPayFailed(
