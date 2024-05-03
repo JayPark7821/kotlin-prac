@@ -1,0 +1,10 @@
+package kr.jay.payment.common
+
+fun <T> T?.query(f: (T) -> String): String {
+    return when {
+        this == null -> ""
+        this is String && this.isBlank() -> ""
+        this is Collection<*> && this.isEmpty() -> ""
+        else -> f.invoke(this)
+    }
+}

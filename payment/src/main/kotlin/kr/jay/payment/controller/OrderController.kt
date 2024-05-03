@@ -6,9 +6,7 @@ import kr.jay.payment.common.Beans.Companion.beanProductService
 import kr.jay.payment.model.Order
 import kr.jay.payment.model.PgStatus
 import kr.jay.payment.repository.ProductInOrderRepository
-import kr.jay.payment.service.OrderService
-import kr.jay.payment.service.ProductService
-import kr.jay.payment.service.ReqCreateOrder
+import kr.jay.payment.service.*
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
@@ -23,6 +21,7 @@ import java.time.LocalDateTime
 @RequestMapping("/order")
 class OrderController(
     private val orderService: OrderService,
+    private val orderHistoryService: OrderHistoryService,
 ) {
 
     @GetMapping("/{orderId}")
@@ -36,6 +35,11 @@ class OrderController(
 
     @DeleteMapping("/{orderId}")
     suspend fun delete(@PathVariable("orderId") orderId: Long) = orderService.delete(orderId)
+
+    @GetMapping("/history")
+    suspend fun delete(@RequestBody request: QryOrderHistory ) = orderHistoryService.getHistories(request)
+
+
 }
 
 suspend fun Order.toResOrder() {
