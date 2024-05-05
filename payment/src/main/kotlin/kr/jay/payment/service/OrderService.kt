@@ -27,15 +27,11 @@ import java.util.*
  * @version 1.0.0
  * @since 4/26/24
  */
-
-private val logger = KotlinLogging.logger {}
-
 @Service
 class OrderService(
     private val orderRepository: OrderRepository,
     private val productInOrderRepository: ProductInOrderRepository,
     private val productService: ProductService,
-    private val tossPayApi: TossPayApi,
 ) {
 
     @Transactional
@@ -94,69 +90,10 @@ class OrderService(
         orderRepository.save(order)
     }
 
-
-    @Transactional
-    suspend fun capture(request: RequestPaySucceed) : Boolean{
-        val order = getOrderByPgOrderId(request.orderId). apply {
-            pgStatus = PgStatus.CAPTURE_REQUEST
-            beanOrderService.save(this)
-        }
-
-        return try{
-            tossPayApi.confirm(request)
-            order.pgStatus = PgStatus.CAPTURE_SUCCESS
-            true
-        } catch (e: Exception){
-            order.pgStatus = when {
-                e is WebClientRequestException -> PgStatus.CAPTURE_RETRY
-                e is WebClientResponseException -> PgStatus.CAPTURE_FAIL
-                else -> PgStatus.CAPTURE_FAIL
-            }
-            false
-        } finally {
-            beanOrderService.save(order)
-        }
-    }
-
-    @Transactional
-    suspend fun authSucceed(request: RequestPaySucceed): Boolean {
-        val order = getOrderByPgOrderId(request.orderId).apply{
-            pgKey = request.paymentKey
-            pgStatus= PgStatus.AUTH_SUCCESS
-        }
-
-        try{
-            return if(order.amount != request.amount){
-                order.pgStatus = PgStatus.AUTH_INVALID
-                false
-            } else{
-                true
-            }
-        } finally {
-            orderRepository.save(order)
-        }
-    }
-
     suspend fun getOrderByPgOrderId(pgOrderId: String): Order {
         return orderRepository.findByPgOrderId(pgOrderId) ?: throw NoOrderFound("pgOrderId: $pgOrderId")
     }
 
-    @Transactional
-    suspend fun authFailed(request: RequestPayFailed) {
-        val order = getOrderByPgOrderId(request.orderId)
-        if(order.pgStatus == PgStatus.CREATE){
-            order.pgStatus = PgStatus.AUTH_FAIL
-            orderRepository.save(order)
-        }
-
-        logger.error{"""
-            >> Fail on error
-             - request: $request
-             - order: $order
-        """.trimIndent()
-        }
-
-    }
 }
 
 data class ReqCreateOrder(

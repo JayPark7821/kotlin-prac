@@ -37,6 +37,7 @@ private val logger = KotlinLogging.logger {}
 class OrderServiceTest(
     @Autowired orderService: OrderService,
     @Autowired productRepository: ProductRepository,
+    @Autowired paymentService: PaymentService,
     @Autowired productInOrderRepository: ProductInOrderRepository,
     @Autowired tossPayApi: TossPayApi
 ): StringSpec({
@@ -89,7 +90,7 @@ class OrderServiceTest(
 
         val token = RequestPaySucceed("test idempotent key", order.pgOrderId!!, order.amount, TossPaymentType.NORMAL)
 
-        orderService.authSucceed(token)
+        paymentService.authSucceed(token)
         val orderAuthed = orderService.get(order. id).also{it.pgStatus shouldBe PgStatus.AUTH_SUCCESS}
 
         Mockito.`when`(tossPayApi.confirm(token)).thenReturn(ResConfirm(
@@ -101,7 +102,7 @@ class OrderServiceTest(
 
         ))
 
-        orderService.capture(token)
+        paymentService.capture(token)
         orderService.get(order.id).also{it.pgStatus shouldBe PgStatus.CAPTURE_SUCCESS}
     }
 
@@ -111,13 +112,13 @@ class OrderServiceTest(
 
         val token = RequestPaySucceed("test idempotent key", order.pgOrderId!!, order.amount, TossPaymentType.NORMAL)
 
-        orderService.authSucceed(token)
+        paymentService.authSucceed(token)
         val orderAuthed = orderService.get(order. id).also{it.pgStatus shouldBe PgStatus.AUTH_SUCCESS}
 
         Mockito.`when`(tossPayApi.confirm(token)).thenThrow(
             WebClientRequestException::class.java
         )
-        orderService.capture(token)
+        paymentService.capture(token)
         orderService.get(order.id).also{it.pgStatus shouldBe PgStatus.CAPTURE_RETRY}
     }
 
@@ -127,13 +128,13 @@ class OrderServiceTest(
 
         val token = RequestPaySucceed("test idempotent key", order.pgOrderId!!, order.amount, TossPaymentType.NORMAL)
 
-        orderService.authSucceed(token)
+        paymentService.authSucceed(token)
         val orderAuthed = orderService.get(order. id).also{it.pgStatus shouldBe PgStatus.AUTH_SUCCESS}
 
         Mockito.`when`(tossPayApi.confirm(token)).thenThrow(
             WebClientResponseException::class.java
         )
-        orderService.capture(token)
+        paymentService.capture(token)
         orderService.get(order.id).also{it.pgStatus shouldBe PgStatus.CAPTURE_FAIL}
     }
 })
