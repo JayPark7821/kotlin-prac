@@ -1,4 +1,8 @@
 spring:
+  profiles:
+    active: test
+---
+spring:
   output:
     ansi:
       enabled: always

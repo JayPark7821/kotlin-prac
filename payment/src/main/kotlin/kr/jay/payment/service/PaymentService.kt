@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import java.time.Duration
+import java.time.LocalDateTime
 
 /**
  * PaymentService
@@ -31,6 +33,7 @@ class PaymentService(
     private val tossPayApi: TossPayApi,
     private val objectMapper: ObjectMapper,
     private val paymentApi: PaymentApi,
+    private val captureMarker: CaptureMarker,
 ) {
 
     @Transactional
@@ -76,6 +79,9 @@ class PaymentService(
             throw InvalidOrderStatus("Invalid order: ${order.id} ${order.pgStatus}")
         }
         order.increaseRetryCount()
+
+        captureMarker.put(order.id)
+
         try {
             tossPayApi.confirm(order.toReqPaySucceed())
             order.pgStatus = CAPTURE_SUCCESS
@@ -92,6 +98,7 @@ class PaymentService(
                         else -> CAPTURE_FAIL
                     }
                 }
+
                 else -> CAPTURE_FAIL
             }
             if (order.pgStatus == CAPTURE_RETRY && order.pgRetryCount >= 3)
@@ -100,8 +107,10 @@ class PaymentService(
                 throw e
         } finally {
             orderService.save(order)
-            if (order.pgStatus == CAPTURE_RETRY)
+            captureMarker.remove(order.id)
+            if (order.pgStatus == CAPTURE_RETRY) {
                 paymentApi.recapture(order.id)
+            }
         }
     }
 
@@ -112,6 +121,17 @@ class PaymentService(
             orderService.save(this)
         }
         capture(order)
+    }
+
+    suspend fun recaptureOnBoot() {
+        val now = LocalDateTime.now()
+        captureMarker.getAll()
+            .filter { Duration.between(it.updatedAt, now).seconds >= 60 }
+            .also { if (it.isEmpty()) return }
+            .forEach {
+                captureMarker.remove(it.id)
+                paymentApi.recapture(it.id)
+            }
     }
 
     private fun Order.toReqPaySucceed() =

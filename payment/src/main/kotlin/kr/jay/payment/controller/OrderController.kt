@@ -27,6 +27,7 @@ class OrderController(
     private val orderService: OrderService,
     private val orderHistoryService: OrderHistoryService,
     private val paymentService: PaymentService,
+    private val captureMarker: CaptureMarker
 ) {
 
     @GetMapping("/{orderId}")
@@ -59,6 +60,10 @@ class OrderController(
         val delay = temp + (0..temp).random()
         return delay.milliseconds
     }
+
+    @GetMapping("/capturing")
+    suspend fun getCapturingOrder()=
+        captureMarker.getAll()
 }
 
 suspend fun Order.toResOrder() {

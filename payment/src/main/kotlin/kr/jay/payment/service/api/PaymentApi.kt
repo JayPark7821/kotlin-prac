@@ -1,5 +1,7 @@
 package kr.jay.payment.service.api
 
+import kr.jay.payment.service.CaptureMarker
+import kr.jay.payment.service.OrderService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -17,7 +19,8 @@ import org.springframework.web.reactive.function.client.bodyToMono
 @Service
 class PaymentApi(
     @Value("\${payment.self.domain}")
-    private val domain: String,
+    domain: String,
+    private val captureMarker: CaptureMarker
 ) {
 
     private val client = WebClient.builder().baseUrl(domain)
@@ -25,6 +28,7 @@ class PaymentApi(
         .build()
 
     suspend fun recapture(orderId: Long) {
+        captureMarker.put(orderId)
         client.put().uri("/order/recapture/$orderId").retrieve()
             .bodyToMono<String>().subscribe()
     }
