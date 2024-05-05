@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import kr.jay.payment.config.WithRedisContainer
 import kr.jay.payment.controller.RequestPaySucceed
 import kr.jay.payment.controller.TossPaymentType
 import kr.jay.payment.exception.NoProductFound
@@ -40,9 +41,9 @@ class OrderServiceTest(
     @Autowired paymentService: PaymentService,
     @Autowired productInOrderRepository: ProductInOrderRepository,
     @Autowired tossPayApi: TossPayApi
-): StringSpec({
+): WithRedisContainer, StringSpec({
 
-    beforeTest{
+    beforeSpec{
         productRepository.save(Product(1, "apple", 1000).apply { new = true })
         productRepository.save(Product(2, "banana", 1200).apply { new = true })
         productRepository.save(Product(3, "mango", 700).apply { new = true })
