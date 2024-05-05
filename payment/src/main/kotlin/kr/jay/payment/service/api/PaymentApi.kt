@@ -5,6 +5,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 
 /**
  * PaymentApi
@@ -25,6 +26,7 @@ class PaymentApi(
 
     suspend fun recapture(orderId: Long) {
         client.put().uri("/order/recapture/$orderId").retrieve()
+            .bodyToMono<String>().subscribe()
     }
 
 }

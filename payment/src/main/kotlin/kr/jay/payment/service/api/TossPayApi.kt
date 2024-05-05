@@ -1,5 +1,6 @@
 package kr.jay.payment.service.api
 
+import io.netty.channel.ChannelOption
 import io.netty.handler.ssl.SslContextBuilder
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory
 import kr.jay.payment.controller.RequestPaySucceed
@@ -38,7 +39,11 @@ class TossPayApi(
             .pendingAcquireTimeout(Duration.ofSeconds(10))
             .build()
         val connector =
-            ReactorClientHttpConnector(HttpClient.create(provider).secure { it.sslContext(insecureSslContext) })
+            ReactorClientHttpConnector(
+                HttpClient.create(provider)
+                    .secure { it.sslContext(insecureSslContext) }
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000)
+            )
 
         return WebClient.builder()
             .baseUrl(domain)
