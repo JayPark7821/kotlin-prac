@@ -1,4 +1,4 @@
-package kr.jay.payment.service
+package kr.jay.payment.service.api
 
 import io.netty.handler.ssl.SslContextBuilder
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory
@@ -47,7 +47,7 @@ class TossPayApi(
             .build()
     }
 
-    suspend fun confirm(request: RequestPaySucceed): ResConfirm{
+    suspend fun confirm(request: RequestPaySucceed): ResConfirm {
         return client.post()
             .uri("/v1/payments/confirm")
             .header("Authorization", "Basic $secret")

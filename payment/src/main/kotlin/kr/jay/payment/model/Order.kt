@@ -41,4 +41,9 @@ class Order(
             Order::pgStatus,
             Order::pgRetryCount,
         ), superToString = { super.toString() })
+
+    fun increaseRetryCount(){
+        if(pgStatus == PgStatus.CAPTURE_RETRY)
+            pgRetryCount++
+    }
 }

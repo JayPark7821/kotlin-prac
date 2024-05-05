@@ -12,8 +12,9 @@ import kr.jay.payment.model.PgStatus
 import kr.jay.payment.model.Product
 import kr.jay.payment.repository.ProductInOrderRepository
 import kr.jay.payment.repository.ProductRepository
+import kr.jay.payment.service.api.ResConfirm
+import kr.jay.payment.service.api.TossPayApi
 import mu.KotlinLogging
-import org.junit.jupiter.api.Assertions.*
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -94,14 +95,16 @@ class OrderServiceTest(
         paymentService.authSucceed(token)
         val orderAuthed = orderService.get(order. id).also{it.pgStatus shouldBe PgStatus.AUTH_SUCCESS}
 
-        Mockito.`when`(tossPayApi.confirm(token)).thenReturn(ResConfirm(
+        Mockito.`when`(tossPayApi.confirm(token)).thenReturn(
+            ResConfirm(
             paymentKey = orderAuthed.pgKey!!,
             orderId = orderAuthed.pgOrderId!!,
             status = "Done",
             totalAmount = orderAuthed.amount,
             method = "card"
 
-        ))
+        )
+        )
 
         paymentService.capture(token)
         orderService.get(order.id).also{it.pgStatus shouldBe PgStatus.CAPTURE_SUCCESS}

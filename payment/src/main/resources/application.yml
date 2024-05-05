@@ -38,6 +38,8 @@ server:
     include-stacktrace: always
 
 payment:
+  self:
+    domain: http://localhost:8080
   toss:
     domain: https://api.tosspayments.com
     key:

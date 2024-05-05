@@ -1,11 +1,14 @@
 package kr.jay.payment.service
 
-import kr.jay.payment.common.Beans
+import com.fasterxml.jackson.databind.ObjectMapper
 import kr.jay.payment.controller.RequestPayFailed
 import kr.jay.payment.controller.RequestPaySucceed
-import kr.jay.payment.exception.NoOrderFound
+import kr.jay.payment.controller.TossPaymentType
+import kr.jay.payment.exception.InvalidOrderStatus
 import kr.jay.payment.model.Order
-import kr.jay.payment.model.PgStatus
+import kr.jay.payment.model.PgStatus.*
+import kr.jay.payment.service.api.PaymentApi
+import kr.jay.payment.service.api.TossPayApi
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -26,21 +29,22 @@ private val logger = KotlinLogging.logger {}
 class PaymentService(
     private val orderService: OrderService,
     private val tossPayApi: TossPayApi,
-
+    private val objectMapper: ObjectMapper,
+    private val paymentApi: PaymentApi,
 ) {
 
     @Transactional
     suspend fun authSucceed(request: RequestPaySucceed): Boolean {
-        val order = orderService.getOrderByPgOrderId(request.orderId).apply{
+        val order = orderService.getOrderByPgOrderId(request.orderId).apply {
             pgKey = request.paymentKey
-            pgStatus= PgStatus.AUTH_SUCCESS
+            pgStatus = AUTH_SUCCESS
         }
 
-        try{
-            return if(order.amount != request.amount){
-                order.pgStatus = PgStatus.AUTH_INVALID
+        try {
+            return if (order.amount != request.amount) {
+                order.pgStatus = AUTH_INVALID
                 false
-            } else{
+            } else {
                 true
             }
         } finally {
@@ -51,12 +55,13 @@ class PaymentService(
     @Transactional
     suspend fun authFailed(request: RequestPayFailed) {
         val order = orderService.getOrderByPgOrderId(request.orderId)
-        if(order.pgStatus == PgStatus.CREATE){
-            order.pgStatus = PgStatus.AUTH_FAIL
+        if (order.pgStatus == CREATE) {
+            order.pgStatus = AUTH_FAIL
             orderService.save(order)
         }
 
-        logger.error{"""
+        logger.error {
+            """
             >> Fail on error
              - request: $request
              - order: $order
@@ -66,26 +71,67 @@ class PaymentService(
     }
 
     @Transactional
-    suspend fun capture(request: RequestPaySucceed) : Boolean{
-        val order = orderService.getOrderByPgOrderId(request.orderId). apply {
-            pgStatus = PgStatus.CAPTURE_REQUEST
-            Beans.beanOrderService.save(this)
+    suspend fun capture(order: Order) {
+        if (order.pgStatus !in setOf(CAPTURE_REQUEST, CAPTURE_RETRY)) {
+            throw InvalidOrderStatus("Invalid order: ${order.id} ${order.pgStatus}")
         }
+        order.increaseRetryCount()
+        try {
+            tossPayApi.confirm(order.toReqPaySucceed())
+            order.pgStatus = CAPTURE_SUCCESS
+        } catch (e: Exception) {
+            order.pgStatus = when (e) {
+                is WebClientRequestException -> CAPTURE_RETRY
+                is WebClientResponseException -> {
+                    val resError = e.toToosPayApiError()
+                    logger.error { ">>> res error: $resError" }
 
-        return try{
-            tossPayApi.confirm(request)
-            order.pgStatus = PgStatus.CAPTURE_SUCCESS
-            true
-        } catch (e: Exception){
-            order.pgStatus = when {
-                e is WebClientRequestException -> PgStatus.CAPTURE_RETRY
-                e is WebClientResponseException -> PgStatus.CAPTURE_FAIL
-                else -> PgStatus.CAPTURE_FAIL
+                    when (resError.code) {
+                        "ALREADY_PROCESSED_PAYMENT" -> CAPTURE_SUCCESS
+                        "PROVIDER_ERROR", "FAILED_INTERNAL_SYSTEM_PROCESSING" -> CAPTURE_RETRY
+                        else -> CAPTURE_FAIL
+                    }
+                }
+                else -> CAPTURE_FAIL
             }
-            false
+            if (order.pgStatus == CAPTURE_RETRY && order.pgRetryCount >= 3)
+                order.pgStatus = CAPTURE_FAIL
+            if (order.pgStatus != CAPTURE_SUCCESS)
+                throw e
         } finally {
-            Beans.beanOrderService.save(order)
+            orderService.save(order)
+            if (order.pgStatus == CAPTURE_RETRY)
+                paymentApi.recapture(order.id)
         }
     }
+
+    @Transactional
+    suspend fun capture(request: RequestPaySucceed) {
+        val order = orderService.getOrderByPgOrderId(request.orderId).apply {
+            pgStatus = CAPTURE_REQUEST
+            orderService.save(this)
+        }
+        capture(order)
+    }
+
+    private fun Order.toReqPaySucceed() =
+        this.let {
+            RequestPaySucceed(
+                paymentKey = it.pgKey!!,
+                orderId = it.pgOrderId!!,
+                amount = it.amount,
+                paymentType = TossPaymentType.NORMAL
+            )
+        }
+
+    private fun WebClientResponseException.toToosPayApiError(): ToosPayApiError {
+        val json = String(this.responseBodyAsByteArray)
+        return objectMapper.readValue(json, ToosPayApiError::class.java)
+    }
 }
+
+data class ToosPayApiError(
+    val code: String,
+    val message: String,
+)
 

@@ -1,11 +1,10 @@
 package kr.jay.payment.controller
 
-import kr.jay.payment.common.Beans
+import kotlinx.coroutines.delay
 import kr.jay.payment.common.Beans.Companion.beanProductInOrderRepository
 import kr.jay.payment.common.Beans.Companion.beanProductService
 import kr.jay.payment.model.Order
 import kr.jay.payment.model.PgStatus
-import kr.jay.payment.repository.ProductInOrderRepository
 import kr.jay.payment.service.*
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
@@ -22,6 +21,7 @@ import java.time.LocalDateTime
 class OrderController(
     private val orderService: OrderService,
     private val orderHistoryService: OrderHistoryService,
+    private val paymentService: PaymentService,
 ) {
 
     @GetMapping("/{orderId}")
@@ -37,9 +37,15 @@ class OrderController(
     suspend fun delete(@PathVariable("orderId") orderId: Long) = orderService.delete(orderId)
 
     @GetMapping("/history")
-    suspend fun delete(@RequestBody request: QryOrderHistory ) = orderHistoryService.getHistories(request)
+    suspend fun delete(@RequestBody request: QryOrderHistory) = orderHistoryService.getHistories(request)
 
-
+    @PutMapping("/recapture/{orderId}")
+    suspend fun recapture(@PathVariable("orderId") orderId: Long) {
+        orderService.get(orderId).let { order ->
+            delay(1000)
+            paymentService.capture(order)
+        }
+    }
 }
 
 suspend fun Order.toResOrder() {
