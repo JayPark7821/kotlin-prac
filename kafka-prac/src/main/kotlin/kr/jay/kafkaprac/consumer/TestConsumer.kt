@@ -12,11 +12,23 @@ import org.springframework.stereotype.Service
  * @since 5/7/24
  */
 private val logger = KotlinLogging.logger {}
+
 @Service
 class TestConsumer {
 
-    @KafkaListener(topics = ["test"],)
-    fun consume(message: String) {
-        logger.info { "Consumed message: $message" }
+    @KafkaListener(
+        topics = ["test"],
+        groupId = "A"
+    )
+    fun consumeA(message: String) {
+        logger.info { "A Consumed message: $message" }
+    }
+
+    @KafkaListener(
+        topics = ["test"],
+        groupId = "B"
+    )
+    fun consumeB(message: String) {
+        logger.info { "B Consumed message: $message" }
     }
 }
