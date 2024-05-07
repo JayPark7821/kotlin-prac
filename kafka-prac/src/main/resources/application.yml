@@ -1,0 +1,17 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+  application:
+    name: kafka-consumer
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      auto-offset-reset: earliest
+      group-id: test
+
+logging:
+  level:
+    kr.jay.kafkaprac: debug
+  pattern:
+    console: "%d{HH:mm:ss.SSS}|%highlight(%-5level)|%X{txid:-}|%green(%t)|%logger|%blue(\\(%F:%L\\))|%msg%n"
