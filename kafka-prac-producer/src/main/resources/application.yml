@@ -1,0 +1,14 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+  application:
+    name: kafka-producer
+  kafka:
+    bootstrap-servers: localhost:9092
+
+logging:
+  level:
+    kr.jay.kafkaprac: debug
+  pattern:
+    console: "%d{HH:mm:ss.SSS}|%highlight(%-5level)|%X{txid:-}|%green(%t)|%logger|%blue(\\(%F:%L\\))|%msg%n"
