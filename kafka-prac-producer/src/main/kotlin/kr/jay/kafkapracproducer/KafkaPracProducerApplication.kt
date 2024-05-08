@@ -10,10 +10,12 @@ import org.springframework.kafka.annotation.EnableKafka
 @SpringBootApplication
 @EnableKafka
 class KafkaPracProducerApplication(
-    private val producer: TestProducer
-): ApplicationRunner{
+    private val producer: TestProducer,
+) : ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
-        producer.send("test", "test message")
+        repeat(2) { i ->
+            producer.send("test", "test message $i")
+        }
     }
 
 }
