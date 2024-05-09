@@ -13,11 +13,15 @@ private val logger = KotlinLogging.logger {}
 @SpringBootApplication
 @EnableKafka
 class KafkaPracApplication(
-    private val consumer: Consumer
-):ApplicationRunner{
+    private val consumer: Consumer,
+) : ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
-        consumer.consume("test", "A")
-        consumer.consume("test", "B")
+        consumer.consume("test", "A") {
+            logger.info { "A Consumed message: $it" }
+        }
+        consumer.consume("test", "B") {
+            logger.info { "B Consumed message: $it" }
+        }
     }
 
 }
