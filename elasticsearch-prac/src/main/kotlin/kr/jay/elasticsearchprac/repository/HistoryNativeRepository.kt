@@ -49,16 +49,24 @@ class HistoryNativeRepository(
                 )
             }
             request.fromDt?.toLocalDate()?.atStartOfDay()?.let {
-                History::createdAt.criteria.greaterThanEqual(it)
+                and(
+                    History::createdAt.criteria.greaterThanEqual(it)
+                )
             }
             request.toDt?.toLocalDate()?.atStartOfDay()?.let {
-                History::createdAt.criteria.lessThan(it)
+                and(
+                    History::createdAt.criteria.lessThan(it)
+                )
             }
             request.fromAmount?.let {
-                History::amount.criteria.greaterThanEqual(it)
+                and(
+                    History::amount.criteria.greaterThanEqual(it)
+                )
             }
             request.toAmount?.let {
-                History::amount.criteria.lessThanEqual(it)
+                and(
+                    History::amount.criteria.lessThanEqual(it)
+                )
             }
         }
 
