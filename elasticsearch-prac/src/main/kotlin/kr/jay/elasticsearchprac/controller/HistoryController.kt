@@ -53,6 +53,11 @@ class HistoryController(
         repository.deleteAll()
     }
 
+    @GetMapping("/search")
+    suspend fun search(request: QrySearch): ResSearch{
+        return historyNativeRepository.search(request)
+    }
+
 }
 
 data class ReqSaveHistory(

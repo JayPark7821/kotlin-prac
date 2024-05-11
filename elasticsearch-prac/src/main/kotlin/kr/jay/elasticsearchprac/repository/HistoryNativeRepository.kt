@@ -65,12 +65,14 @@ class HistoryNativeRepository(
         val query = CriteriaQuery(criteria, PageRequest.of(0, request.pageSize)).apply {
 //            sort = Sort.by(Sort.Direction.DESC, History::createdAt.name)
             sort = History::createdAt.sort(Sort.Direction.DESC)
+            searchAfter = request.pageNext
         }
 
-        return template.searchForPage(query, History::class.java).awaitSingle().let {
+        return template.searchForPage(query, History::class.java).awaitSingle().let { res ->
             ResSearch(
-                it.content.map { it.content },
-                it.totalElements
+                res.content.map { it.content },
+                res.totalElements,
+                res.content.lastOrNull()?.sortValues
             )
         }
     }
@@ -93,9 +95,11 @@ class QrySearch(
     val fromAmount: Long?,
     val toAmount: Long?,
     val pageSize: Int = 10,
+    val pageNext: List<Long>? = null,
 )
 
 data class ResSearch(
     val items: List<History>,
     val total: Long,
+    val pageNext: List<Any>?,
 )
