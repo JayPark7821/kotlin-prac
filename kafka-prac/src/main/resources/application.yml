@@ -18,3 +18,7 @@ logging:
     kr.jay.kafkaprac: debug
   pattern:
     console: "%d{HH:mm:ss.SSS}|%highlight(%-5level)|%X{txid:-}|%green(%t)|%logger|%blue(\\(%F:%L\\))|%msg%n"
+
+api:
+  history:
+    domain: http://localhost:8081

@@ -1,1 +1,1 @@
-rootProject.name = "kafka-prac"
+rootProject.name = "kafka-payments-consumer"
