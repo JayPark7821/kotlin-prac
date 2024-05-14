@@ -48,7 +48,7 @@ class HistoryController(
         repository.deleteById(orderId)
     }
 
-    @DeleteMapping
+    @DeleteMapping("/all")
     suspend fun deleteAll() {
         repository.deleteAll()
     }
@@ -57,7 +57,6 @@ class HistoryController(
     suspend fun search(request: QrySearch): ResSearch{
         return historyNativeRepository.search(request)
     }
-
 }
 
 data class ReqSaveHistory(
