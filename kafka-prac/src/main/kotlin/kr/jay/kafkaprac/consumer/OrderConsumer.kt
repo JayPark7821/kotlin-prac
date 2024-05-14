@@ -35,9 +35,10 @@ class OrderConsumer(
         consumer.consume(TOPIC_PAYMENT, "sum") { record ->
             toOrder(record).let { order ->
                 logger.debug { ">> sum: $order" }
-                total +=order.amount
-                historyApi.save(order)
-                logger.debug { ">> total: $total" }
+                if(order.pgStatus == PgStatus.CAPTURE_SUCCESS){
+                    total +=order.amount
+                    logger.debug { ">> total: $total" }
+                }
             }
         }
     }

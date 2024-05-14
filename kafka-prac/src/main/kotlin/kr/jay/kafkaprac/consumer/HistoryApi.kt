@@ -21,7 +21,7 @@ import java.time.LocalDateTime
  */
 @Service
 class HistoryApi(
-    @Value("api.history.domain")
+    @Value("\${api.history.domain}")
     private val domain: String
 ) {
     private val client = WebClient.builder().baseUrl(domain)
