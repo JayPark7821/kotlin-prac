@@ -1,6 +1,7 @@
 package kr.jay.payment.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import kr.jay.payment.common.KafkaProducer
 import kr.jay.payment.controller.RequestPayFailed
 import kr.jay.payment.controller.RequestPaySucceed
 import kr.jay.payment.controller.TossPaymentType
@@ -34,6 +35,7 @@ class PaymentService(
     private val objectMapper: ObjectMapper,
     private val paymentApi: PaymentApi,
     private val captureMarker: CaptureMarker,
+    private val kafkaProducer: KafkaProducer,
 ) {
 
     @Transactional
@@ -111,6 +113,7 @@ class PaymentService(
             if (order.pgStatus == CAPTURE_RETRY) {
                 paymentApi.recapture(order.id)
             }
+            kafkaProducer.sendPayment(order)
         }
     }
 

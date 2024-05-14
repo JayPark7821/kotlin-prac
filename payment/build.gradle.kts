@@ -20,6 +20,9 @@ repositories {
 }
 
 dependencies {
+    implementation("io.projectreactor.kafka:reactor-kafka:1.3.3")
+    implementation("org.springframework.kafka:spring-kafka")
+
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop
     implementation("org.springframework.boot:spring-boot-starter-aop")
     // https://mvnrepository.com/artifact/io.micrometer/context-propagation
