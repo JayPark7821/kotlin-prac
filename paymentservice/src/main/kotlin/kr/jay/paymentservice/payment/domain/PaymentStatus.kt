@@ -12,6 +12,13 @@ enum class PaymentStatus(description: String) {
     EXECUTING("결제 진행 중"),
     SUCCESS("결제 성공"),
     FAILURE("결제 실패"),
-    UNKNOWN("알 수 없음"),
+    UNKNOWN("알 수 없음"),;
 
+
+    companion object {
+        fun get(status: String): PaymentStatus {
+            return entries.find{ it.name == status } ?: throw IllegalArgumentException("Invalid PaymentType: $status")
+
+        }
+    }
 }

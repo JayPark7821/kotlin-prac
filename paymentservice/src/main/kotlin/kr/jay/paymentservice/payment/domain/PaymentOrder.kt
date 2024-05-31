@@ -22,4 +22,6 @@ data class PaymentOrder(
     private var isWalletUpdated: Boolean = false,
 
 ) {
+    fun isLedgerUpdated() = isLedgerUpdated
+    fun isWalletUpdated() = isWalletUpdated
 }
