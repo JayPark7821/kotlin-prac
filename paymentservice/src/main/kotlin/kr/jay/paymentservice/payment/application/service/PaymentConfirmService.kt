@@ -19,6 +19,6 @@ class PaymentConfirmService (
     private val paymentStatusUpdatePort: PaymentStatusUpdatePort
 ): PaymentConfirmUseCase {
     override fun confirm(command: PaymentConfirmCommand): Mono<PaymentConfirmationResult> {
-        TODO("Not yet implemented")
+        paymentStatusUpdatePort.updatePaymentStatusToExecuting(command.orderId, command.paymentKey)
     }
 }
