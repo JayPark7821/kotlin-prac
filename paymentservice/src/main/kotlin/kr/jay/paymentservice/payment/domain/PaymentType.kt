@@ -12,7 +12,7 @@ enum class PaymentType(description: String) {
 
     companion object {
         fun get(type: String): PaymentType {
-            return entries.find{ it.name == type } ?: throw IllegalArgumentException("Invalid PaymentType: $type")
+            return entries.find{ it.name == type } ?: error("Invalid PaymentType: $type")
 
         }
     }

@@ -3,6 +3,7 @@ package kr.jay.paymentservice.payment.application.service
 import kr.jay.paymentservice.common.UseCase
 import kr.jay.paymentservice.payment.application.port.`in`.PaymentConfirmCommand
 import kr.jay.paymentservice.payment.application.port.`in`.PaymentConfirmUseCase
+import kr.jay.paymentservice.payment.application.port.out.PaymentExecutorPort
 import kr.jay.paymentservice.payment.application.port.out.PaymentStatusUpdatePort
 import kr.jay.paymentservice.payment.application.port.out.PaymentValidationPort
 import kr.jay.paymentservice.payment.domain.PaymentConfirmationResult
@@ -16,12 +17,14 @@ import reactor.core.publisher.Mono
  * @since 6/5/24
  */
 @UseCase
-class PaymentConfirmService (
+class PaymentConfirmService(
     private val paymentStatusUpdatePort: PaymentStatusUpdatePort,
-    private val paymentValidationPort: PaymentValidationPort
-): PaymentConfirmUseCase {
+    private val paymentValidationPort: PaymentValidationPort,
+    private val paymentExecutorPort: PaymentExecutorPort,
+) : PaymentConfirmUseCase {
     override fun confirm(command: PaymentConfirmCommand): Mono<PaymentConfirmationResult> {
         paymentStatusUpdatePort.updatePaymentStatusToExecuting(command.orderId, command.paymentKey)
             .filterWhen { paymentValidationPort.isValid(command.orderId, command.amount) }
+            .flatMap { paymentExecutorPort.execute(command) }
     }
 }

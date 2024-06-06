@@ -10,4 +10,12 @@ package kr.jay.paymentservice.payment.domain
 enum class PaymentMethod(description: String) {
     EASY_PAY("간편결제")
     ;
+
+
+    companion object {
+        fun get(method: String): PaymentMethod {
+            return PaymentMethod.entries.find{ it.name == method } ?: error("Invalid PaymentMethod: $method")
+
+        }
+    }
 }
