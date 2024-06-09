@@ -1,6 +1,7 @@
 package kr.jay.paymentservice.payment.adapter.out.persistent.repository
 
 import kr.jay.paymentservice.payment.adapter.out.persistent.exception.PaymentAlreadyProcessedException
+import kr.jay.paymentservice.payment.application.port.out.PaymentStatusUpdateCommand
 import kr.jay.paymentservice.payment.domain.PaymentStatus
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Repository
@@ -27,6 +28,64 @@ class R2DBCPaymentStatusUpdateRepository(
             .flatMap { updatePaymentKey(orderId, paymentKey) }
             .`as`(transactionalOperator::transactional)
            .thenReturn(true)
+    }
+
+    override fun updatePaymentStatus(command: PaymentStatusUpdateCommand): Mono<Boolean> {
+        return when (command.status){
+            PaymentStatus.SUCCESS-> updatePaymentStatusToSuccess(command)
+            PaymentStatus.FAILURE-> updatePaymentStatusToFailure(command)
+            PaymentStatus.UNKNOWN-> updatePaymentStatusToUnknown(command)
+            else -> error("결제 상태 ${command.status} 는 올바르지 않은 결제 상태입니다.")
+
+        }
+    }
+
+    private fun updatePaymentStatusToUnknown(command: PaymentStatusUpdateCommand): Mono<Boolean> {
+        return selectPaymentOrderStatus(command.orderId)
+            .collectList()
+            .flatMap { insertPaymentHistory(it, command.status, "UNKNOWN") }
+            .flatMap { updatePaymentOrderStatus(command.orderId, command.status) }
+            .flatMap { incrementPaymentOrderFailedCount(command) }
+            .`as`(transactionalOperator::transactional)
+            .thenReturn(true)
+    }
+
+    private fun incrementPaymentOrderFailedCount(command: PaymentStatusUpdateCommand): Mono<Long> {
+        return databaseClient.sql(INCREMENT_PAYMENT_ORDER_FAILED_COUNT_QUERY)
+            .bind("orderId", command.orderId)
+            .fetch()
+            .rowsUpdated()
+    }
+
+    private fun updatePaymentStatusToFailure(command: PaymentStatusUpdateCommand): Mono<Boolean> {
+        return selectPaymentOrderStatus(command.orderId)
+            .collectList()
+            .flatMap { insertPaymentHistory(it, command.status, command.failure.toString()) }
+            .flatMap { updatePaymentOrderStatus(command.orderId, command.status) }
+            .`as`(transactionalOperator::transactional)
+            .thenReturn(true)
+    }
+
+    private fun updatePaymentStatusToSuccess(command: PaymentStatusUpdateCommand): Mono<Boolean> {
+        return selectPaymentOrderStatus(command.orderId)
+            .collectList()
+            .flatMap { insertPaymentHistory(it, command.status, "PAYMENT_CONFIRMATION_DONE") }
+            .flatMap { updatePaymentOrderStatus(command.orderId, command.status) }
+            .flatMap { updatePaymentEventExtraDetails(command) }
+            .`as`(transactionalOperator::transactional)
+            .thenReturn(true)
+    }
+
+    private fun updatePaymentEventExtraDetails(command: PaymentStatusUpdateCommand): Mono<Long> {
+        return databaseClient.sql(UPDATE_PAYMENT_EVENT_EXTRA_DETAILS_QUERY)
+            .bind("orderName", command.extraDetails!!.orderName)
+            .bind("method", command.extraDetails.method)
+            .bind("approvedAt", command.extraDetails.approvedAt.toString())
+            .bind("type", command.extraDetails.type)
+            .bind("orderId", command.orderId)
+            .fetch()
+            .rowsUpdated()
+        // psp raw데이터도 같이 저장!!!!!!!!!!
     }
 
     private fun updatePaymentKey(orderId: String, paymentKey: String): Mono<Long> {
@@ -119,6 +178,18 @@ class R2DBCPaymentStatusUpdateRepository(
         val UPDATE_PAYMENT_KEY_QUERY = """
             UPDATE payment_events
             SET payment_key = :paymentKey
+            WHERE order_id = :orderId
+        """.trimIndent()
+
+        val UPDATE_PAYMENT_EVENT_EXTRA_DETAILS_QUERY = """
+            UPDATE payment_events
+            SET order_name = :orderName, method = :method, approved_at = :approvedAt, type = :type, updated_at = CURRENT_TIMESTAMP
+            WHERE order_id = :orderId
+        """.trimIndent()
+
+        val INCREMENT_PAYMENT_ORDER_FAILED_COUNT_QUERY = """
+            UPDATE payment_orders
+            SET failed_count = failed_count + 1
             WHERE order_id = :orderId
         """.trimIndent()
     }
