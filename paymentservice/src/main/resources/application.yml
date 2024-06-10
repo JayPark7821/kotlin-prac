@@ -7,7 +7,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   thymeleaf:
     cache: false
-
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
+        r2dbc: DEBUG
+        transaction: DEBUG
 psp:
   toss:
     secretKey: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6

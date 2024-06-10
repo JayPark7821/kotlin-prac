@@ -4,6 +4,7 @@ import kr.jay.paymentservice.payment.adapter.out.persistent.exception.PaymentVal
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Mono
+import java.math.BigDecimal
 import java.math.BigInteger
 
 /**
@@ -23,7 +24,7 @@ class R2DBCPaymentValidationRepository(
             .fetch()
             .first()
             .handle { row, sink ->
-                if ((row["total_amount"] as BigInteger).toLong() == amount) {
+                if ((row["total_amount"] as BigDecimal).toLong() == amount) {
                     sink.next(true)
                 } else {
                     sink.error(PaymentValidationException("결제 (orderId: $orderId) 에서 금액 (amount: $amount)이 올바르지 않습니다.") )

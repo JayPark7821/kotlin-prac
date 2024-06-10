@@ -1,4 +1,4 @@
-package com.example.paymentservice2.payment.test
+package kr.jay.paymentservice.payment.test
 
 
 import kr.jay.paymentservice.payment.domain.*
@@ -8,7 +8,6 @@ import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
-import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 class R2DBCPaymentDatabaseHelper (
