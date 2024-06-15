@@ -1,3 +1,5 @@
+
+import org.gradle.internal.impldep.org.junit.platform.launcher.TagFilter.excludeTags
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -43,4 +45,5 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+//    excludeTags("TooLongTime")
 }

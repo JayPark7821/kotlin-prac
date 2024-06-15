@@ -36,6 +36,7 @@ class PaymentConfirmServiceTest(
     @Autowired private val paymentStatusUpdatePort: PaymentStatusUpdatePort,
     @Autowired private val paymentValidationPort: PaymentValidationPort,
     @Autowired private val paymentDatabaseHelper: PaymentDatabaseHelper,
+    @Autowired private val paymentErrorHandler: PaymentErrorHandler,
 ) {
     private val mockPaymentExecutorPort = mockk<PaymentExecutorPort>()
 
@@ -67,10 +68,11 @@ class PaymentConfirmServiceTest(
         val paymentConfirmService = PaymentConfirmService(
             paymentStatusUpdatePort = paymentStatusUpdatePort,
             paymentValidationPort = paymentValidationPort,
-            paymentExecutorPort = mockPaymentExecutorPort
+            paymentExecutorPort = mockPaymentExecutorPort,
+            paymentErrorHandler = paymentErrorHandler
         )
 
-        val paymentExecutionResult= PaymentExecutionResult(
+        val paymentExecutionResult = PaymentExecutionResult(
             paymentKey = paymentConfirmCommand.paymentKey,
             orderId = paymentConfirmCommand.orderId,
             extraDetails = PaymentExtraDetails(
@@ -96,11 +98,15 @@ class PaymentConfirmServiceTest(
         val paymentEvent = paymentDatabaseHelper.getPayments(orderId)!!
 
         assertThat(paymentConfirmationResult.status).isEqualTo(PaymentStatus.SUCCESS)
-        assertThat(paymentEvent.paymentOrders.all{ it.paymentStatus == PaymentStatus.SUCCESS })
+        assertThat(paymentEvent.paymentOrders.all { it.paymentStatus == PaymentStatus.SUCCESS })
         assertThat(paymentEvent.paymentType).isEqualTo(paymentExecutionResult.extraDetails!!.type)
         assertThat(paymentEvent.paymentMethod).isEqualTo(paymentExecutionResult.extraDetails!!.method)
         assertThat(paymentEvent.orderName).isEqualTo(paymentExecutionResult.extraDetails!!.orderName)
-        assertThat(paymentEvent.approvedAt?.truncatedTo(ChronoUnit.MINUTES)).isEqualTo(paymentExecutionResult.extraDetails!!.approvedAt.truncatedTo(ChronoUnit.MINUTES))
+        assertThat(paymentEvent.approvedAt?.truncatedTo(ChronoUnit.MINUTES)).isEqualTo(
+            paymentExecutionResult.extraDetails!!.approvedAt.truncatedTo(
+                ChronoUnit.MINUTES
+            )
+        )
     }
 
     @Test
@@ -126,10 +132,11 @@ class PaymentConfirmServiceTest(
         val paymentConfirmService = PaymentConfirmService(
             paymentStatusUpdatePort = paymentStatusUpdatePort,
             paymentValidationPort = paymentValidationPort,
-            paymentExecutorPort = mockPaymentExecutorPort
+            paymentExecutorPort = mockPaymentExecutorPort,
+            paymentErrorHandler = paymentErrorHandler
         )
 
-        val paymentExecutionResult= PaymentExecutionResult(
+        val paymentExecutionResult = PaymentExecutionResult(
             paymentKey = paymentConfirmCommand.paymentKey,
             orderId = paymentConfirmCommand.orderId,
             extraDetails = PaymentExtraDetails(
@@ -141,7 +148,7 @@ class PaymentConfirmServiceTest(
                 approvedAt = LocalDateTime.now(),
                 pspRawData = "pspRawData",
             ),
-            failure= PaymentExecutionFailure("ERROR", "TEST ERROR") ,
+            failure = PaymentFailure("ERROR", "TEST ERROR"),
             isSuccess = false,
             isRetryable = false,
             isFailure = true,
@@ -156,11 +163,11 @@ class PaymentConfirmServiceTest(
         val paymentEvent = paymentDatabaseHelper.getPayments(orderId)!!
 
         assertThat(paymentConfirmationResult.status).isEqualTo(PaymentStatus.FAILURE)
-        assertThat(paymentEvent.paymentOrders.all{ it.paymentStatus == PaymentStatus.FAILURE })
+        assertThat(paymentEvent.paymentOrders.all { it.paymentStatus == PaymentStatus.FAILURE })
     }
 
     @Test
-    fun `should be marked as UNKNOWN if payment confirmation fails due to an unknown exception`(){
+    fun `should be marked as UNKNOWN if payment confirmation fails due to an unknown exception`() {
         val orderId = UUID.randomUUID().toString()
 
         val checkoutCommand = CheckoutCommand(
@@ -181,9 +188,10 @@ class PaymentConfirmServiceTest(
         val paymentConfirmService = PaymentConfirmService(
             paymentStatusUpdatePort = paymentStatusUpdatePort,
             paymentValidationPort = paymentValidationPort,
-            paymentExecutorPort = mockPaymentExecutorPort
+            paymentExecutorPort = mockPaymentExecutorPort,
+            paymentErrorHandler = paymentErrorHandler
         )
-        val paymentExecutionResult= PaymentExecutionResult(
+        val paymentExecutionResult = PaymentExecutionResult(
             paymentKey = paymentConfirmCommand.paymentKey,
             orderId = paymentConfirmCommand.orderId,
             extraDetails = PaymentExtraDetails(
@@ -195,7 +203,7 @@ class PaymentConfirmServiceTest(
                 approvedAt = LocalDateTime.now(),
                 pspRawData = "pspRawData",
             ),
-            failure= PaymentExecutionFailure("ERROR", "TEST ERROR") ,
+            failure = PaymentFailure("ERROR", "TEST ERROR"),
             isSuccess = false,
             isRetryable = false,
             isFailure = false,
@@ -210,7 +218,7 @@ class PaymentConfirmServiceTest(
         val paymentEvent = paymentDatabaseHelper.getPayments(orderId)!!
 
         assertThat(paymentConfirmationResult.status).isEqualTo(PaymentStatus.UNKNOWN)
-        assertThat(paymentEvent.paymentOrders.all{ it.paymentStatus == PaymentStatus.UNKNOWN })
+        assertThat(paymentEvent.paymentOrders.all { it.paymentStatus == PaymentStatus.UNKNOWN })
 
     }
 }

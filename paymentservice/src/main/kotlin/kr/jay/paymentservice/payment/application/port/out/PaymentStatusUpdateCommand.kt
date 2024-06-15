@@ -1,6 +1,6 @@
 package kr.jay.paymentservice.payment.application.port.out
 
-import kr.jay.paymentservice.payment.domain.PaymentExecutionFailure
+import kr.jay.paymentservice.payment.domain.PaymentFailure
 import kr.jay.paymentservice.payment.domain.PaymentExtraDetails
 import kr.jay.paymentservice.payment.domain.PaymentStatus
 
@@ -16,7 +16,7 @@ data class PaymentStatusUpdateCommand(
     val orderId: String,
     val status: PaymentStatus,
     val extraDetails: PaymentExtraDetails? = null,
-    val failure: PaymentExecutionFailure? = null
+    val failure: PaymentFailure? = null
 ){
     init {
         require(status == PaymentStatus.SUCCESS || status == PaymentStatus.FAILURE || status == PaymentStatus.UNKNOWN) {
