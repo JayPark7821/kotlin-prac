@@ -26,7 +26,7 @@ import java.time.format.DateTimeFormatter
 @Component
 class TossPaymentExecutor(
     private val tossPaymentWebClient: WebClient,
-    private val uri: String = "/v1/payments/confirm",
+    private val uri: String = "/v1/payments/confirm"
 ) : PaymentExecutor {
 
 
@@ -82,7 +82,7 @@ class TossPaymentExecutor(
             }
             .retryWhen(Retry.backoff(2, Duration.ofSeconds(1)).jitter(0.1)
                 .filter { (it is PSPConfirmationException && it.isRetryableError) || it is TimeoutException }
-                .onRetryExhaustedThrow { _, retrySignal -> retrySignal.failure() as PSPConfirmationException }
+                .onRetryExhaustedThrow { _, retrySignal -> retrySignal.failure() }
             )
     }
 }

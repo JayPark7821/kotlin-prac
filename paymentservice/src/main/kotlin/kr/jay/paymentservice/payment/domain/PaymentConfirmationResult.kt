@@ -9,7 +9,7 @@ package kr.jay.paymentservice.payment.domain
  */
 data class PaymentConfirmationResult(
     val status: PaymentStatus,
-    val failure: PaymentExecutionFailure? = null,
+    val failure: PaymentFailure? = null,
 ){
     init {
         if(status == PaymentStatus.FAILURE) {

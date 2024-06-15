@@ -1,5 +1,6 @@
 package kr.jay.paymentservice.payment.adapter.out.web.config
 
+import io.netty.handler.timeout.ReadTimeoutHandler
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -11,6 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
 import reactor.netty.resources.ConnectionProvider
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * TossWebClientConfiguration
@@ -20,10 +22,10 @@ import java.util.*
  * @since 5/29/24
  */
 @Configuration
-class TossWebClientConfiguration (
+class TossWebClientConfiguration(
     @Value("\${psp.toss.url}") private val baseUrl: String,
     @Value("\${psp.toss.secretKey}") private val secretKey: String,
-){
+) {
     @Bean
     fun tossPaymentClient(): WebClient {
         val encodedSecretKey = Base64.getEncoder().encodeToString(("$secretKey:").toByteArray())
@@ -39,7 +41,13 @@ class TossWebClientConfiguration (
 
     private fun reactorClientHttpConnector(): ClientHttpConnector {
         val provider = ConnectionProvider.builder("toss-payment").build()
-        return ReactorClientHttpConnector(HttpClient.create(provider))
+
+        val clientBase = HttpClient.create(provider)
+            .doOnConnected {
+                it.addHandlerLast(ReadTimeoutHandler(30, TimeUnit.SECONDS))
+            }
+        
+        return ReactorClientHttpConnector(clientBase)
     }
 
 }
