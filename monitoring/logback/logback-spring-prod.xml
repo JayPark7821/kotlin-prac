@@ -1,0 +1,59 @@
+<included>
+    <property resource="logback-variables.properties"/>
+    <appender name="MDC_REQUEST" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %replace([ID %X{TRX_ID}]){'\[ID \]', '[SYSTEM]'} ${LOG_PATTERN}
+            </pattern>
+            <outputPatternAsHeader>true</outputPatternAsHeader>
+        </encoder>
+    </appender>
+
+    <appender name="LOKI_APPENDER" class="com.github.loki4j.logback.Loki4jAppender">
+        <http>
+            <url>http://118.130.133.104:3100/loki/api/v1/push</url>
+        </http>
+        <format>
+            <label>
+                <pattern>app=${server.name},host=${HOSTNAME},level=%level</pattern>
+                <readMarkers>true</readMarkers>
+            </label>
+            <message>
+                <pattern>
+                    {
+                    "date":"%d{yyyy-MM-dd HH:mm:ss, ${logback.timezone:-Asia/Seoul}}",
+                    "level":"%-5level",
+                    "class":"%logger{40}:%line",
+                    "thread":"%thread",
+                    "message": "%msg",
+                    "requestId": "%replace([ID %X{TRX_ID}]){'\[ID \]', '[SYSTEM]'}"
+                    }
+                </pattern>
+            </message>
+        </format>
+    </appender>
+
+    <appender name="FILE_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>./logs/${BY_DATE}.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level value="INFO"/>
+        </filter>
+        <encoder>
+            <pattern>
+                %replace([ID %X{TRX_ID}]){'\[ID \]', '[SYSTEM]'} ${LOG_PATTERN}
+            </pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>./backup/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="MDC_REQUEST"/>
+        <appender-ref ref="LOKI_APPENDER"/>
+        <appender-ref ref="FILE_APPENDER"/>
+    </root>
+</included>
