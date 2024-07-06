@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
     <timestamp key="BY_DATE" datePattern="yyyy-MM-dd"/>
+    <springProperty name="APPLICATION_NAME" source="spring.application.name" />
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <springProfile name="prod">
         <include resource="logback-spring-prod.xml"/>
